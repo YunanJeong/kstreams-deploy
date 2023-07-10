@@ -1,0 +1,14 @@
+apiVersion: v2
+name: kse
+description: Kafka Streams 예제를 위한 차트
+
+type: application
+
+version: 0.0.1
+
+appVersion: "0.0.1"
+
+#dependencies:
+#  - name: kafka
+#    version: 22.1.3
+#    repository: https://charts.bitnami.com/bitnami

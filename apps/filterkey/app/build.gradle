@@ -1,0 +1,19 @@
+plugins {
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.kafka:kafka-streams:3.4.0'
+    implementation 'org.slf4j:slf4j-api:2.0.7'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+}
+
+application {
+    // Define the main class for the application.
+    mainClass = 'filterkey.App'
+}
+

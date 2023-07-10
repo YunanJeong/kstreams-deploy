@@ -1,0 +1,48 @@
+apiVersion: skaffold/v4beta3 
+kind: Config 
+
+build: 
+  artifacts:
+  #- image: kse-filterkey
+  #  context: apps/filterkey
+  - image: kse-my-first-streams
+    context: apps/my_first_streams
+
+deploy: 
+  helm:
+    releases:
+    - name: kse
+      chartPath: helm
+      skipBuildDependencies: true
+      #setValueTemplates:
+      #valueFiles:
+      
+profiles:
+  - name: filterkey 
+    patches: 
+      - op: add 
+        path: /deploy/helm/releases/0/valuesFiles 
+        value: 
+          - configs/filterkey.yaml
+      - op: add
+        path: /deploy/helm/releases/0/setValueTemplates
+        value:
+          filterkey.image.registry: '{{ .IMAGE_DOMAIN_kse_filterkey }}'
+          filterkey.image.repository: '{{ .IMAGE_REPO_NO_DOMAIN_kse_filterkey }}'
+          filterkey.image.tag: '{{ .IMAGE_TAG_kse_filterkey }}'
+  
+  # my_first_streams 프로파일 참조하여 실행시, parser.yaml을 helm value파일로 쓴다.
+  - name: my_first_streams
+    patches:
+      - op: add
+        path: /deploy/helm/releases/0/valuesFiles
+        value:
+          - configs/my_first_streams.yaml
+      - op: add
+        path: /deploy/helm/releases/0/setValueTemplates
+        value:
+          filterkey.image.registry: '{{ .IMAGE_DOMAIN_kse_filterkey }}'
+          filterkey.image.repository: '{{ .IMAGE_REPO_NO_DOMAIN_kse_filterkey }}'
+          filterkey.image.tag: '{{ .IMAGE_TAG_kse_filterkey }}'
+
+  
