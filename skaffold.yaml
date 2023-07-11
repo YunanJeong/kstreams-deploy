@@ -17,21 +17,10 @@ deploy:
       #setValueTemplates:
       #valueFiles:
       
+
 profiles:
-  - name: filterkey 
-    patches: 
-      - op: add 
-        path: /deploy/helm/releases/0/valuesFiles 
-        value: 
-          - configs/filterkey.yaml
-      - op: add
-        path: /deploy/helm/releases/0/setValueTemplates
-        value:
-          filterkey.image.registry: '{{ .IMAGE_DOMAIN_kse_filterkey }}'
-          filterkey.image.repository: '{{ .IMAGE_REPO_NO_DOMAIN_kse_filterkey }}'
-          filterkey.image.tag: '{{ .IMAGE_TAG_kse_filterkey }}'
-  
   # my_first_streams 프로파일 참조하여 실행시, parser.yaml을 helm value파일로 쓴다.
+  # skaffold dev -p my_first_streams
   - name: my_first_streams
     patches:
       - op: add
