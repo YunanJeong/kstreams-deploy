@@ -17,21 +17,10 @@ deploy:
       #setValueTemplates:
       #valueFiles:
       
+
 profiles:
-  - name: filterkey 
-    patches: 
-      - op: add 
-        path: /deploy/helm/releases/0/valuesFiles 
-        value: 
-          - configs/filterkey.yaml
-      - op: add
-        path: /deploy/helm/releases/0/setValueTemplates
-        value:
-          filterkey.image.registry: '{{ .IMAGE_DOMAIN_kse_filterkey }}'
-          filterkey.image.repository: '{{ .IMAGE_REPO_NO_DOMAIN_kse_filterkey }}'
-          filterkey.image.tag: '{{ .IMAGE_TAG_kse_filterkey }}'
-  
   # my_first_streams 프로파일 참조하여 실행시, parser.yaml을 helm value파일로 쓴다.
+  # skaffold dev -p my_first_streams
   - name: my_first_streams
     patches:
       - op: add
@@ -41,8 +30,11 @@ profiles:
       - op: add
         path: /deploy/helm/releases/0/setValueTemplates
         value:
-          filterkey.image.registry: '{{ .IMAGE_DOMAIN_kse_filterkey }}'
-          filterkey.image.repository: '{{ .IMAGE_REPO_NO_DOMAIN_kse_filterkey }}'
-          filterkey.image.tag: '{{ .IMAGE_TAG_kse_filterkey }}'
+          # skaffold 기능: 로컬 레지스트리에 방금 build된 이미지의 정보를 불러오기
+          # suffix는 build.aritfacs와 맞춰야 한다.
+          # helm으로 라이브 배포시엔 이거 쓰지말고 config에 이미지상세를 명시하는게 좋다.
+          streams.image.registry: '{{ .IMAGE_DOMAIN_kse_my_first_streams }}'
+          streams.image.repository: '{{ .IMAGE_REPO_NO_DOMAIN_kse_my_first_streams }}'
+          streams.image.tag: '{{ .IMAGE_TAG_kse_my_first_streams }}'
 
   

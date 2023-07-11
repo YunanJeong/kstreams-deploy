@@ -1,0 +1,48 @@
+{{- $src_topic := (include "kse.tplvalues.render" ( dict "value" .Values.streams.kafka.srcTopic "context" $) ) }}
+{{- $sink_topic := (include "kse.tplvalues.render" ( dict "value" .Values.streams.kafka.sinkTopic "context" $) ) }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kse.fullname" . }}-streams
+  labels:
+    {{- include "kse.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.streams.replicas }}
+  selector:
+    matchLabels:
+      {{- include "kse.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.streams.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "kse.selectorLabels" . | nindent 8 }}
+    spec:
+
+      containers:
+        - name: {{ .Chart.Name }}-streams
+          image: '{{ include "kse.image" .Values.streams.image }}'
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: KAFKA_BROKER
+              value: {{ .Values.streams.kafka.server }}
+            - name: KAFKA_SRC_TOPIC
+              value: {{ include "kse.tplvalues.render" ( dict "value" .Values.streams.kafka.srcTopic "context" $) }}
+            - name: KAFKA_SINK_TOPIC
+              value: {{ include "kse.tplvalues.render" ( dict "value" .Values.streams.kafka.sinkTopic "context" $) }}
+          resources:
+            {{- toYaml .Values.streams.resources | nindent 12 }}
+      {{- with .Values.streams.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.streams.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.streams.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

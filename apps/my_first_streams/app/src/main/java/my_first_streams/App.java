@@ -13,13 +13,16 @@ import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Properties;
 
 public class App {
-    public static final String mChatLog0 = "chatlogflow";
-    public static final String mChatLog1 = "chatflow";
+    private static final Logger logger = LoggerFactory.getLogger(App.class);
+    private static final String mChatLog0 = "chatlogflow";
+    private static final String mChatLog1 = "chatflow";
 
     public static void main(final String[] args) throws Exception {
         String broker = System.getenv("KAFKA_BROKER");
@@ -28,7 +31,8 @@ public class App {
         System.out.println("Kafka broker: " + broker);
         System.out.println("Kafka srcTopic: " + srcTopic);
         System.out.println("Kafka sinkTopic: " + sinkTopic);
-        
+        logger.info(">>>>>>>>>>>>>>>SIFJ4>>>INFO>>>>>>>>>>>>>");
+
         // 설정값
         Properties props = new Properties();
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, "filterkey-application");
@@ -41,18 +45,13 @@ public class App {
         KStream<String, String> source = builder.stream(srcTopic);
 
         ObjectMapper mapper = new ObjectMapper();
-        String message = "";
-        String[] parsedMsg;
-        String tableName = "";
-        String userId = "";
         // 필터링 0: 채팅로그만 남긴다.
         KStream<String, String> filteredStream = source.filter((key, value) -> {
             try {
                 JsonNode jsonNode = mapper.readTree(value);      // Record(Stream)에서 value부분을 json으로 읽는다.
-                message = jsonNode.get("message");
-                parsedMsg = message.split("\\|");
-                tableName = parsedMsg[0];
-                
+                String message = jsonNode.get("message").asText();
+                String[] parsedMsg = message.split("\\|");
+                String tableName = parsedMsg[0];
                 return (tableName.equals(mChatLog0) || tableName.equals(mChatLog1));  //true가 아니면 버림
             } catch (Exception e) {
                 return false;
@@ -62,7 +61,10 @@ public class App {
         // 필터링 1: userId를 추출하여 Key로 할당한다.
         KStream<String, String> filterkeyStream = filteredStream.map((key, value) -> {
             try {
-                userId = parsedMsg[8];
+                JsonNode jsonNode = mapper.readTree(value);      // Record(Stream)에서 value부분을 json으로 읽는다.
+                String message = jsonNode.get("message").asText();
+                String[] parsedMsg = message.split("\\|");
+                String userId = parsedMsg[8];
                 return new KeyValue<>(userId, message); //
             } catch (Exception e) {
                 e.printStackTrace();
@@ -77,4 +79,7 @@ public class App {
 
         Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
     }
+
+
 }
+

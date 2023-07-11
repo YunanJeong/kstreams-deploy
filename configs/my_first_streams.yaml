@@ -1,11 +1,11 @@
 # filterkey 예제 설정 
-filterkey:
+streams:
   # 파드 수
   replicas: 2
-  image:
-    registry: "docker.wai"
-    repository: "yunan/log-transformer-streams"
-    tag: 0.0.1
+  #image:
+    #registry: ""
+    #repository: "library/kse-my-first-streams"
+    #tag: dev
 
   kafka: 
     # KStreams의 처리대상 카프카 설정
