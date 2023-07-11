@@ -4,12 +4,12 @@ streams:
   replicas: 2
   image:
     registry: ""
-    repository: "library/kse-filterkey"
+    repository: "library/kse-my-first-streams"
     tag: latest
 
   kafka: 
     # KStreams의 처리대상 카프카 설정
-    bootstrap-server: "somthing-kafka-headless:9092"
+    server: "somthing-kafka-headless:9092"
     srcTopic: default-src
 
     # 처리 결과가 적재될 토픽 설정
