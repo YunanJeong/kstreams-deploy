@@ -13,11 +13,14 @@ import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Properties;
 
 public class App {
+    private static final Logger logger = LoggerFactory.getLogger(App.class);
     public static final String mChatLog0 = "chatlogflow";
     public static final String mChatLog1 = "chatflow";
 
@@ -28,7 +31,8 @@ public class App {
         System.out.println("Kafka broker: " + broker);
         System.out.println("Kafka srcTopic: " + srcTopic);
         System.out.println("Kafka sinkTopic: " + sinkTopic);
-        
+        logger.info(">>>>>>>>>>>>>>>SIFJ4>>>INFO>>>>>>>>>>>>>");
+
         // 설정값
         Properties props = new Properties();
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, "filterkey-application");
