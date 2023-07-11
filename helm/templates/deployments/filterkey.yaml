@@ -3,17 +3,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "kse.fullname" . }}-filterkey
+  name: {{ include "kse.fullname" . }}-streams
   labels:
     {{- include "kse.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.filterkey.replicas }}
+  replicas: {{ .Values.streams.replicas }}
   selector:
     matchLabels:
       {{- include "kse.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.filterkey.podAnnotations }}
+      {{- with .Values.streams.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -67,8 +67,8 @@ spec:
             fi            
           done
       containers:
-        - name: {{ .Chart.Name }}-filterkey
-          image: '{{ include "kse.image" .Values.filterkey.image }}'
+        - name: {{ .Chart.Name }}-streams
+          image: '{{ include "kse.image" .Values.streams.image }}'
           imagePullPolicy: IfNotPresent
           env:
           - name: KAFKA_BROKER
@@ -78,16 +78,16 @@ spec:
           - name: KAFKA_SINK_TOPIC
             value: {{ include "kse.tplvalues.render" ( dict "value" .Values.kafka.sinkTopic "context" $) }}
           resources:
-            {{- toYaml .Values.filterkey.resources | nindent 12 }}
-      {{- with .Values.filterkey.nodeSelector }}
+            {{- toYaml .Values.streams.resources | nindent 12 }}
+      {{- with .Values.streams.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.filterkey.affinity }}
+      {{- with .Values.streams.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.filterkey.tolerations }}
+      {{- with .Values.streams.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
