@@ -2,10 +2,10 @@
 streams:
   # 파드 수
   replicas: 2
-  #image:
-    #registry: ""
-    #repository: "library/kse-my-first-streams"
-    #tag: dev
+  image:
+    registry: private.docker.wai
+    repository: "yunan/kse-my-first-streams"
+    tag: 0.0.1
 
   kafka: 
     # KStreams의 처리대상 카프카 설정
