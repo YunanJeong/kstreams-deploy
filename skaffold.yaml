@@ -32,7 +32,7 @@ profiles:
         value:
           # skaffold 기능: 로컬 레지스트리에 방금 build된 이미지의 정보를 불러오기
           # suffix는 build.aritfacs와 맞춰야 한다.
-          # helm으로 라이브 배포시엔 이거 쓰지말고 config에 이미지상세를 명시하는게 좋다.
+          # 우선순위: cli options > skaffold.yaml > value파일 > default value
           streams.image.registry: '{{ .IMAGE_DOMAIN_kse_my_first_streams }}'
           streams.image.repository: '{{ .IMAGE_REPO_NO_DOMAIN_kse_my_first_streams }}'
           streams.image.tag: '{{ .IMAGE_TAG_kse_my_first_streams }}'
