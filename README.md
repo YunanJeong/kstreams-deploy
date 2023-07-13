@@ -4,7 +4,7 @@ Test to deploy K-Streams in Container Orchestration Environment
 
 - 이미지 빌드
 ```bash
-# 테스트 또는 개발용 실행시
+# 테스트 또는 개발용 빌드시
 skaffold build -p my_first_streams
 
 # 특정 레지스트리 지정시 예시
@@ -18,7 +18,11 @@ skaffold dev -p my_first_streams
 
 - 헬름 배포 예시
 ```bash
-helm install kse helm/chartrepo/kse-0.0.1.tgz -f configs/my-first-streams.yaml
+# 헬름차트 아카이브 생성
+helm package helm/
+
+# 헬름으로 배포하기
+helm install kse helm/kse-0.0.1.tgz -f configs/my-first-streams.yaml
 ```
 
 - memo

@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 public class App {
     private static final Logger logger = LoggerFactory.getLogger(App.class);
@@ -29,9 +30,8 @@ public class App {
         String srcTopic = System.getenv("KAFKA_SRC_TOPIC");
         String sinkTopic = System.getenv("KAFKA_SINK_TOPIC");
         System.out.println("Kafka broker: " + broker);
-        System.out.println("Kafka srcTopic: " + srcTopic);
-        System.out.println("Kafka sinkTopic: " + sinkTopic);
-        logger.info(">>>>>>>>>>>>>>>SIFJ4>>>INFO>>>>>>>>>>>>>");
+        logger.info("Kafka srcTopic: " + srcTopic);
+        logger.info("Kafka sinkTopic: " + sinkTopic);
 
         // 설정값
         Properties props = new Properties();
@@ -42,7 +42,10 @@ public class App {
 
         // 스트림
         StreamsBuilder builder = new StreamsBuilder();
-        KStream<String, String> source = builder.stream(srcTopic);
+        // KStream<String, String> source = builder.stream(srcTopic);
+
+        //다수 토픽 읽을 시, regex 사용방법
+        KStream<String, String> source = builder.stream(Pattern.compile(srcTopic));
 
         ObjectMapper mapper = new ObjectMapper();
         // 필터링 0: 채팅로그만 남긴다.
