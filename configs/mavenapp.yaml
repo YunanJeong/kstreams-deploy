@@ -1,0 +1,12 @@
+# filterkey 예제 설정 
+streams:
+  # 파드 수
+  replicas: 2
+  image:
+    registry: private.docker.wai
+    repository: "yunan/ksa-mavenapp"
+    tag: 0.0.1
+
+  kafka: 
+    server: "somthing-kafka-headless:9092"
+    

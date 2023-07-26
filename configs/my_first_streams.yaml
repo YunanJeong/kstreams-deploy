@@ -9,9 +9,9 @@ streams:
 
   kafka: 
     # KStreams의 처리대상 카프카 설정
-    bootstrap-server: "somthing-kafka-headless:9092"
-    srcTopic: src-topic
+    server: "apk-kafka-headless:9092"
+    #srcTopic: src-topic
 
     # 처리 결과가 적재될 토픽 설정
-    numPartitions: 8
-    sinkTopic: sink-topic
+    #numPartitions: 8
+    #sinkTopic: sink-topic

@@ -14,3 +14,6 @@ WORKDIR /app
 COPY --from=build /app/app/build/install/app . 
 CMD ["bin/app"]
 
+
+# 일반적인 gradle 빌드파일 생성경로 Project/build/install/Project/
+

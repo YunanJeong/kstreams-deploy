@@ -12,5 +12,5 @@ plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '0.4.0'
 }
 
-rootProject.name = 'my_first_streams'
-include('app')
+rootProject.name = 'gradleapp'  //Root Project 지정
+include('src')                  //서브 프로젝트 포함. 만약 하위 프로젝트가 여러개인 경우 여러 include를 쓰면된다.

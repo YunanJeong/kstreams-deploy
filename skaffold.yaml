@@ -3,23 +3,25 @@ kind: Config
 
 build: 
   artifacts:
-  #- image: kse-filterkey
-  #  context: apps/filterkey
-  - image: kse-my-first-streams
-    context: apps/my_first_streams
+    #- image: kse-my-first-streams
+    #  context: apps/my_first_streams
+    - image: ksa-gradleapp     # 생성(build)할 이미지 이름(registry) 지정
+      context: apps/gradleapp  # 이미지화 대상 app 경로
+    #- image: ksa-mavenapp
+    #  context: apps/mavenapp
 
-deploy: 
-  helm:
+deploy:
+  # skaffold로 deploy동작이 포함된 명령어 실행시, helm으로 이를 수행하겠다는 뜻
+  helm:  
     releases:
-    - name: kse
-      chartPath: helm
-      skipBuildDependencies: true
-      #setValueTemplates:
-      #valueFiles:
-      
+      - name: testreleasename
+        chartPath: helm         # Helm 차트 경로
+        skipBuildDependencies: true
+        #valueFiles:            # Helm 실행시 사용될 value 파일
+        #setValueTemplates:     # 추가로 설정할 value
 
 profiles:
-  # my_first_streams 프로파일 참조하여 실행시, parser.yaml을 helm value파일로 쓴다.
+  # skaffold 실행시 profile을 선택하여 위 deploy 설정에 추가할 수 있다.
   # skaffold dev -p my_first_streams
   - name: my_first_streams
     patches:
@@ -36,5 +38,18 @@ profiles:
           streams.image.registry: '{{ .IMAGE_DOMAIN_kse_my_first_streams }}'
           streams.image.repository: '{{ .IMAGE_REPO_NO_DOMAIN_kse_my_first_streams }}'
           streams.image.tag: '{{ .IMAGE_TAG_kse_my_first_streams }}'
+  - name: gradleapp
+    patches:
+      - op: add
+        path: /deploy/helm/releases/0/valuesFiles
+        value:
+          - configs/gradleapp.yaml
+  - name: mavenapp
+    patches:
+      - op: add
+        path: /deploy/helm/releases/0/valuesFiles
+        value:
+          - configs/mavenapp.yaml
+
 
   

@@ -22,7 +22,7 @@ spec:
         - name: {{ .Chart.Name }}-streams
           image: '{{ include "kse.image" .Values.streams.image }}'
           imagePullPolicy: IfNotPresent
-          env:  # 전달할 환경변수
+          env:
             - name: KAFKA_BROKER
               value: {{ .Values.streams.kafka.server }}
 
@@ -41,6 +41,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
 
+
       initContainers:
         - name: streams-waits-kafka
           image: bitnami/kafka:latest
@@ -56,10 +57,34 @@ spec:
                 if [ $? -ne 0 ]; then
                   echo "Kafka broker not ready. retrying..."
                   sleep 5
-                else
-                  echo "Kafka broker Ready"
+                # check source topic exists
+                elif echo $EXISTING_TOPICS | grep -w "{{ $src_topic }}" > /dev/null; then
+                  echo "Source topic '{{ $src_topic }}' exists."
                   break
+                else
+                  echo "Source topic '{{ $src_topic }}' does not exist. waiting..."
+                  sleep 5
                 fi
-
               done
 
+              # Create sink topic if not exists
+              while true; do
+                EXISTING_TOPICS=$(kafka-topics.sh --bootstrap-server {{ .Values.streams.kafka.server }} --list 2> /dev/null)
+                # check if sink topic already exists
+                if echo $EXISTING_TOPICS | grep -w "{{ $sink_topic }}" > /dev/null; then
+                  echo "Sink topic '{{ $sink_topic }}' already exists."
+                  exit 0
+                else
+                  echo "Sink topic '{{ $sink_topic }}' does not exist. creating..."
+                fi
+
+                # create topic
+                kafka-topics.sh --bootstrap-server {{ .Values.streams.kafka.server }} --create --topic {{ $sink_topic }} --partitions {{ .Values.streams.kafka.numPartitions}}   2> /dev/null
+                if [ $? -eq 0 ]; then
+                  echo "Sink topic '{{ $sink_topic }}' creation successful."
+                  exit 0
+                else
+                  echo "Sink topic creation failed, retrying..."
+                  sleep 5             
+                fi            
+              done

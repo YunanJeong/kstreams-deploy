@@ -14,6 +14,7 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass = 'my_first_streams.App'
+    // mainClass = '{패캐지명}.{메인클래스명}'
+    mainClass = 'io.github.yunanjeong.kafka.streams.example.App'
 }
 

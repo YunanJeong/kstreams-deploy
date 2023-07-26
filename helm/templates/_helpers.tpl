@@ -76,16 +76,3 @@ Usage:
     @{{ .digest }}
   {{- end }}
 {{- end -}}
-
-{{/*
-Renders a value that contains template.
-Usage:
-{{ include "kse.tplvalues.render" ( dict "value" .Values.path.to.the.Value "context" $) }}
-*/}}
-{{- define "kse.tplvalues.render" -}}
-    {{- if typeIs "string" .value }}
-        {{- tpl .value .context }}
-    {{- else }}
-        {{- tpl (.value | toYaml) .context }}
-    {{- end }}
-{{- end -}}
