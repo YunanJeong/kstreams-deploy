@@ -2,7 +2,7 @@
 # 빌드 단계 
 #
 FROM gradle:8.1.1-jdk11 as build 
-WORKDIR /app
+WORKDIR /app/gradleapp
 COPY . .
 RUN gradle installDist
 
@@ -11,7 +11,7 @@ RUN gradle installDist
 #
 FROM openjdk:11-jre-slim
 WORKDIR /app 
-COPY --from=build /app/app/build/install/app . 
+COPY --from=build /app/gradleapp/build/install/gradleapp . 
 CMD ["bin/app"]
 
 

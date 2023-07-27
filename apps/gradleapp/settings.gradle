@@ -13,4 +13,4 @@ plugins {
 }
 
 rootProject.name = 'gradleapp'  //Root Project 지정
-include('src')                  //서브 프로젝트 포함. 만약 하위 프로젝트가 여러개인 경우 여러 include를 쓰면된다.
+// include('app')                  //서브 프로젝트 포함. 만약 하위 프로젝트가 여러개인 경우 여러 include를 쓰면된다.

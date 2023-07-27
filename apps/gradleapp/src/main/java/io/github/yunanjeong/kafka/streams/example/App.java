@@ -24,9 +24,13 @@ public class App {
     private static final Logger logger = LoggerFactory.getLogger(App.class);
     private static final String mChatLog0 = "chatlogflow";
     private static final String mChatLog1 = "chatflow";
-
+    private static final String srcTopic = "src_topic";
+    private static final String sinkTopic = "sink_topic";
     public static void main(final String[] args) throws Exception {
-        
+        String broker = System.getenv("KAFKA_BROKER");
+        System.out.println("Kafka broker: " + broker);
+        logger.info("Kafka srcTopic: " + srcTopic);
+        logger.info("Kafka sinkTopic: " + sinkTopic);
     }
 
 
