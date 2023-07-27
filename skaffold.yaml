@@ -5,10 +5,10 @@ build:
   artifacts:
     # - image: kse-my-first-streams
     #   context: apps/my_first_streams
-    - image: ksa-gradleapp     # 생성(build)할 이미지 이름(registry) 지정
-      context: apps/gradleapp  # 이미지화 대상 app 경로
-    #- image: ksa-mavenapp
-    #  context: apps/mavenapp
+    #- image: ksa-gradleapp     # 생성(build)할 이미지 이름(registry) 지정
+    #  context: apps/gradleapp  # 이미지화 대상 app 경로
+    - image: ksa-mavenapp
+      context: apps/mavenapp
 
 deploy:
   # skaffold로 deploy동작이 포함된 명령어 실행시, helm으로 이를 수행하겠다는 뜻
