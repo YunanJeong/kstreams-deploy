@@ -18,6 +18,10 @@ spec:
       labels:
         {{- include "kse.selectorLabels" . | nindent 8 }}
     spec:
+      {{- with .Values.streams.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}-streams
           image: '{{ include "kse.image" .Values.streams.image }}'

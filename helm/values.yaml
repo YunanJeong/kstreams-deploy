@@ -7,6 +7,9 @@ streams:
     repository: "library/kse-my-first-streams"
     tag: latest
 
+  # nodeSelector:
+  #   alpaka/node-type: worker
+  
   kafka: 
     # KStreams의 처리대상 카프카 설정
     server: "somthing-kafka-headless:9092"
