@@ -13,7 +13,7 @@ skaffold build --default-repo=127.0.0.0/8 --tag=0.0.1
 
 - 개발용 실행 
 ```bash
-skaffold dev -p my_first_streams --default-repo=127.0.0.0/8 --tag=0.0.1
+skaffold dev -p my_first_streams --default-repo=127.0.0.0/8 --tag=0.0.2
 ```
 
 - 헬름 배포 예시
@@ -22,7 +22,7 @@ skaffold dev -p my_first_streams --default-repo=127.0.0.0/8 --tag=0.0.1
 helm package helm/
 
 # 헬름으로 배포하기
-helm install kse helm/kse-0.0.1.tgz -f configs/my-first-streams.yaml
+helm install kse helm/kse-0.0.2.tgz -f configs/my-first-streams.yaml
 ```
 
 - memo
