@@ -5,15 +5,15 @@ Test to deploy K-Streams in Container Orchestration Environment
 - 이미지 빌드
 ```bash
 # 테스트 또는 개발용 빌드시
-skaffold build -p my_first_streams
+skaffold build 
 
 # 특정 레지스트리 지정시 예시
-skaffold build -p my_first_streams --default-repo=127.0.0.0/8 --tag=0.0.1
+skaffold build --default-repo=127.0.0.0/8 --tag=0.0.1
 ```
 
 - 개발용 실행 
 ```bash
-skaffold dev -p my_first_streams
+skaffold dev -p my_first_streams --default-repo=127.0.0.0/8 --tag=0.0.1
 ```
 
 - 헬름 배포 예시
