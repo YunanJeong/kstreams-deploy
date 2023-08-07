@@ -1,1 +1,25 @@
 # memo
+
+- KafkaStreams 클래스
+	- 객체생성시, Topology와 Properties를 인자로 받는다.
+	- start() 메소드: 스트림즈 절차를 실행하는 코드
+
+- StreamsBuilder 클래스
+	- stream(...) 메소드: return KStream 객체
+	- table(...) 메소드: return KTable 객체
+	- build() 메소드: return Topology 객체
+- KStream 클래스
+	- filter() => 조건만족하는 것만 처리하고, 나머지는 버릴 때 사용
+	- map()
+	- flatMap()
+	- branch()	=> deprecated.  대신 repartition() 권장
+
+
+- Topology 클래스
+	- 스트림즈 앱 1개에 Topology 객체 1개가 일반적
+		=> StreamsBuilder도 Topology 구조를 만들 때 사용하므로 객체 1개만 쓰는 것이 일반적
+	- Topology 객체를 여러 개써도 상관없다.
+		=> Topology마다 독립적인 파이프라인으로 실행됨
+			=> 이 때는 Properties의 APPLICATION_ID_CONFIG도 중복되지 않는 이름을 부여해야 함
+		=> 같은 src_topic을 분기해서 처리할 때 Topology를 여러 개 쓰면 중복읽기되어 비효율적
+			=> 이런 경우, 하나의 Topology에서 branch를 쓰는 게 낫다.
