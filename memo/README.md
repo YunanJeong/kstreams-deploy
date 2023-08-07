@@ -10,9 +10,11 @@
 	- build() 메소드: return Topology 객체
 - KStream 클래스
 	- filter() => 조건만족하는 것만 처리하고, 나머지는 버릴 때 사용
-	- map()
-	- flatMap()
-	- branch()	=> deprecated.  대신 repartition() 권장
+	- map() => 1:1 처리. 하나의 Record를 수정해서 뱉어낸다.
+	- flatMap() => 1:N 처리 하나의 Record에서 조건에 따라 여러 Record를 만들어낸다. (e.g. 문자열을 단어들로 분리)
+	- branch()	=> deprecated.  2.8버전부터 split() 사용
+    - split => 여러 stream으로 "분기"할 때 사용. filter를 여러 개 사용한 것과 비슷하다고 보면 된다
+    - repartition() => Record 조건에 따라 다른 처리를 한다. (분기개념은 아니다. 출력은 하나의 outputstream으로 나온다.)
 
 
 - Topology 클래스
