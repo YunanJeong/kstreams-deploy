@@ -24,8 +24,8 @@ skaffold build -p mavenapp
 skaffold dev -p mavenapp
 
 # 배포용 이미지 빌드 및 push
-# skaffold build -p {profile} --default-repo="{registry}" --tag={version} --push
-skaffold build -p mavenapp -d "private.docker.wai/yunan" --tag=live --push
+# skaffold build -p {profile} --default-repo={registry} --tag={version} --push
+skaffold build -p mavenapp -d "private.docker.wai/yunan" -t live --push
 ```
 
 ## 앱 배포

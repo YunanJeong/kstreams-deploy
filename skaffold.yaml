@@ -51,7 +51,7 @@ profiles:
             valueFiles:
               - values/gradleapp/value.yaml
 
-  - name: my_first_streams
+  - name: my-first-streams
     patches:
       - op: add
         path: /build/artifacts
