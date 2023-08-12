@@ -1,0 +1,20 @@
+streams:
+  replicas: 2
+  
+  # Your Streams App Image.
+  image:
+    registry: private.docker.wai
+    repository: "yunan/kstreams-mavenapp"
+    tag: 0.0.3
+
+  # e.g.)
+  # nodeSelector:
+  #   alpaka/node-type: worker
+  nodeSelector: {}
+    
+  kafka: 
+    # Your Kafka Broker API
+    server: "testbed-kafka-headless:9092"
+    # If true, Streams waits Kafka
+    readinessCheck:
+      enabled: true

@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.haje01.kafka.streams.examples</groupId>
-    <artifactId>kse-hashsplit</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <artifactId>kstreams-mavenapp</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
     <build>
         <plugins>
             <plugin>
@@ -34,7 +34,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>com.github.haje01.kafka.streams.examples.HashSplitApp</mainClass>
+                            <mainClass>io.github.yunanjeong.kafka.streams.examples.App</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
