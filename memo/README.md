@@ -20,7 +20,6 @@
 - BranchedKStream, Map<String, KStream<K,V>>
   - split() => 여러 stream으로 "분기"할 때 사용. filter를 여러 개 사용한 것과 비슷하다고 보면 된다.
 
-
 - Topology 클래스
   - 스트림즈 앱 1개에 Topology 객체 1개가 일반적
     => StreamsBuilder도 Topology 구조를 만들 때 사용하므로 객체 1개만 쓰는 것이 일반적
