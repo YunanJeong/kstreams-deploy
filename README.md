@@ -24,6 +24,3 @@ helm package helm/
 # 헬름으로 배포하기
 helm install kse helm/kse-0.0.2.tgz -f configs/my-first-streams.yaml
 ```
-
-- memo
-    - `helm/templates/deployments/streams.yaml`에서 init Container는 개발 중에는 삭제하면 편하다.
