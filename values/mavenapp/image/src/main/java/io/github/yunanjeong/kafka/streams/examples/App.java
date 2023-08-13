@@ -28,7 +28,7 @@ public class App {
         //AdminClient 및 NewTopic 클래스로 Kafka에 Sink Topic 생성가능
         
         //오프셋 초기화. 입력토픽의 처음부터 읽음. 테스트시만 사용
-        //kafkaStremas.cleanUp();
+        //kafkaStreams.cleanUp();
         
         kafkaStreams.start();
         Runtime.getRuntime().addShutdownHook(new Thread(kafkaStreams::close));
