@@ -9,8 +9,12 @@
   - table(...) 메소드: return KTable 객체
   - build() 메소드: return Topology 객체
 - KStream 객체
-  - filter() => 조건만족하는 것만 처리하고, 나머지는 버릴 때 사용
-  - map() => 1:1 처리. 하나의 Record를 수정해서 뱉어낸다.
+  - filter()
+    - 조건만족하는 것만 처리하고, 나머지는 버릴 때 사용
+  - map()
+    - 1:1 처리. 하나의 Record를 수정해서 뱉어낸다.
+    - return 으로 key를 null로 할당시 레코드는 토픽에 전달되지 않고 버려진다.
+    - null key에 대해 별도 처리를 하고싶은경우 key를 byte[]로 처리하면 된다.
   - flatMap() => 1:N 처리 하나의 Record에서 조건에 따라 여러 Record를 만들어낸다. (e.g. 문자열을 단어들로 분리)
   - branch()
     - deprecated.  2.8버전부터 split() 사용
