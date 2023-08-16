@@ -17,8 +17,13 @@
     - KStream<>이 아니라 KStream<>[] 로 선언된 객체에서 사용한다.
   - repartition() => Record 조건에 따라 다른 처리를 한다. (분기개념은 아니다. 출력은 하나의 outputstream으로 나온다.)
 
-- BranchedKStream, Map<String, KStream<K,V>>
-  - split() => 여러 stream으로 "분기"할 때 사용. filter를 여러 개 사용한 것과 비슷하다고 보면 된다.
+- Map<String, KStream<K,V>>
+  - split()
+    - 여러 stream으로 "분기"할 때 사용.
+    - filter를 여러 개 사용한 것과 비슷하다고 보면 된다.
+    - split() 후 branch()로 각 조건을 기술하는데, 이 때 여러 branch들은 "switch"나 "else"와 같이 서로 배타적이다.=> 복제되어 각각의 if로 처리되는 개념이 아니다.
+- BranchedKStream
+  - 분기를 dynamic하게 작성할 때 사용할 수 있다. [링크](https://kafka.apache.org/35/javadoc/org/apache/kafka/streams/kstream/BranchedKStream.html#branch(org.apache.kafka.streams.kstream.Predicate))
 
 - Topology 클래스
   - 스트림즈 앱 1개에 Topology 객체 1개가 일반적
