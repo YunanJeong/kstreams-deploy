@@ -1,0 +1,14 @@
+streams:
+  # 파드 수
+  replicas: 1
+  image:
+    registry: "docker.io"                   
+    repository: "yunanj/kstreams-branch"  
+    tag: split
+    
+  nodeSelector:
+    alpaka/node-type: worker
+  
+  kafka: 
+    server: "apk-kafka-headless.default.svc.cluster.local:9092"
+    
