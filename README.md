@@ -14,7 +14,7 @@ KStreams 관련 자주 사용될 로직, example, pratice 등을 여기서 작�
 그러나 **Kafka Streams 차트에서는,
 앱(image.repository)이 지속적으로 바뀌어야** 한다. 여러 요구사항과 유스케이스에 따른 비즈니스로직을 일반화하기 어렵기 때문이다.
 
-Kafka Streams가 헬름으로 배포되려면, **이미지 자체(Docker Context)가 헬름 차트의 커스텀 Value**인 것처럼 함께 관리되어야 한다.
+Kafka Streams가 헬름으로 배포되려면, **이미지 자체(Docker Context)가 헬름 차트의 커스텀 Value**인 것처럼 함께 관리되어야 한다. 개별 스트림즈 작업시, 차트 코드는 수정하지않아도, 이미지와 Value는 동시에 자주 수정되기 때문이다. 
 
 ## 디렉토리
 
