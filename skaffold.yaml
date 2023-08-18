@@ -66,4 +66,42 @@ profiles:
             skipBuildDependencies: true
             valueFiles:
               - values/my-first-streams/value.yaml
+
+
+
+
+
+
+
+
+  - name: branch-deprecated
+    patches:
+      - op: add
+        path: /build/artifacts
+        value:
+          - image: kstreams-branch-deprecated
+            context: values/0-branch-deprecated/image/
+      - op: add
+        path: /deploy/helm/releases
+        value:
+          - name: kstreams-branch-deprecated
+            chartPath: chartrepo/kstreams-0.0.3.tgz
+            skipBuildDependencies: true
+            valueFiles:
+              - values/0-branch-deprecated/value.yaml
+  - name: branch-split
+    patches:
+      - op: add
+        path: /build/artifacts
+        value:
+          - image: kstreams-branch-split   
+            context: values/1-branch-split/image/
+      - op: add
+        path: /deploy/helm/releases
+        value:
+          - name: kstreams-branch-split
+            chartPath: chartrepo/kstreams-0.0.3.tgz
+            skipBuildDependencies: true
+            valueFiles:
+              - values/branch-split/value.yaml
   
