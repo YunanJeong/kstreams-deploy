@@ -36,7 +36,8 @@ public class JsonNodeSerde implements Serde<JsonNode> {
             try {
                 return objectMapper.writeValueAsBytes(data);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
+                return null;
             }
         }
     }
@@ -50,7 +51,8 @@ public class JsonNodeSerde implements Serde<JsonNode> {
             try {
                 return objectMapper.readTree(data);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
+                return null;
             }
         }
     }
