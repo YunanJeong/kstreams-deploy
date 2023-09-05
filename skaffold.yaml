@@ -14,8 +14,9 @@ deploy:
       # - name: xxx              # 릴리즈 이름
       #   chartPath: xxx         # Helm 차트 경로 (소스코드, 아카이브 둘 다 가능)
       #   skipBuildDependencies: true
-      #   valueFiles: xxx.yml    # Helm 실행시 사용될 value 파일
-      #   setValueTemplates: xxx # 추가로 설정할 value
+      #   setValueTemplates: xxx # Helm 배포시 개별 value 할당. valuesFiles보다 우선순위가 높다.
+      #   valuesFiles: xxx.yml   # Helm 배포시 overriding values 파일. setValueTemplates 대상 외 나머지 value들만 할당
+                                 # 우선순위 skaffold CLI options > setValueTemplates > valuesFiles
 
 # skaffold 실행시 profile을 선택하여 위 build, deploy 등에 Override할 수 있다.
 profiles:
@@ -32,8 +33,13 @@ profiles:
           - name: kstreams-mavenapp-sample
             chartPath: chartrepo/kstreams-0.0.3.tgz
             skipBuildDependencies: true
-            valueFiles:
+            valuesFiles:
               - values/mavenapp/value.yaml
+            setValueTemplates:
+              streams.kafka.readinessCheck.enabled: false
+              streams.image.registry: "{{ .IMAGE_DOMAIN_kstreams_mavenapp }}"
+              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_mavenapp }}"
+              streams.image.tag: "{{ .IMAGE_TAG_kstreams_mavenapp }}"
       
   - name: gradleapp
     patches:
@@ -48,8 +54,13 @@ profiles:
           - name: kstreams-gradleapp-sample
             chartPath: chartrepo/kstreams-0.0.3.tgz
             skipBuildDependencies: true
-            valueFiles:
+            valuesFiles:
               - values/gradleapp/value.yaml
+            setValueTemplates:
+              streams.kafka.readinessCheck.enabled: false
+              streams.image.registry: "{{ .IMAGE_DOMAIN_kstreams_gradleapp }}"
+              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_gradleapp }}"
+              streams.image.tag: "{{ .IMAGE_TAG_kstreams_gradleapp }}"
 
   - name: my-first-streams
     patches:
@@ -64,14 +75,13 @@ profiles:
           - name: kstreams-my-first-streams
             chartPath: chartrepo/kstreams-0.0.3.tgz
             skipBuildDependencies: true
-            valueFiles:
+            valuesFiles:
               - values/my-first-streams/value.yaml
-
-
-
-
-
-
+            setValueTemplates:
+              streams.kafka.readinessCheck.enabled: false
+              streams.image.registry: "{{ .IMAGE_DOMAIN_kstreams_my_first_streams }}"
+              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_my_first_streams }}"
+              streams.image.tag: "{{ .IMAGE_TAG_kstreams_my_first_streams }}"
 
 
   - name: branch-deprecated
@@ -87,8 +97,14 @@ profiles:
           - name: kstreams-branch-deprecated
             chartPath: chartrepo/kstreams-0.0.3.tgz
             skipBuildDependencies: true
-            valueFiles:
+            valuesFiles:
               - values/0-branch-deprecated/value.yaml
+            setValueTemplates:
+              streams.kafka.readinessCheck.enabled: false
+              streams.image.registry: "{{ .IMAGE_DOMAIN_branch_deprecated }}"
+              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_branch_deprecated }}"
+              streams.image.tag: "{{ .IMAGE_TAG_branch_deprecated }}"
+
   - name: branch-split
     patches:
       - op: add
@@ -102,6 +118,10 @@ profiles:
           - name: kstreams-branch-split
             chartPath: chartrepo/kstreams-0.0.3.tgz
             skipBuildDependencies: true
-            valueFiles:
+            valuesFiles:
               - values/branch-split/value.yaml
-  
+            setValueTemplates:
+              streams.kafka.readinessCheck.enabled: false
+              streams.image.registry: "{{ .IMAGE_DOMAIN_branch_split }}"
+              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_branch_split }}"
+              streams.image.tag: "{{ .IMAGE_TAG_branch_split }}"
