@@ -33,13 +33,14 @@ profiles:
           - name: kstreams-mavenapp-sample
             chartPath: chartrepo/kstreams-0.0.3.tgz
             skipBuildDependencies: true
-            valuesFiles:
-              - values/mavenapp/value.yaml
             setValueTemplates:
               streams.kafka.readinessCheck.enabled: false
+              streams.nodeSelector: "null"
               streams.image.registry: "{{ .IMAGE_DOMAIN_kstreams_mavenapp }}"
               streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_mavenapp }}"
-              streams.image.tag: "{{ .IMAGE_TAG_kstreams_mavenapp }}"
+              streams.image.tag: "{{ .IMAGE_TAG_kstreams_mavenapp }}" 
+            valuesFiles:
+              - values/mavenapp/value.yaml
       
   - name: gradleapp
     patches:
@@ -54,13 +55,14 @@ profiles:
           - name: kstreams-gradleapp-sample
             chartPath: chartrepo/kstreams-0.0.3.tgz
             skipBuildDependencies: true
-            valuesFiles:
-              - values/gradleapp/value.yaml
             setValueTemplates:
               streams.kafka.readinessCheck.enabled: false
+              streams.nodeSelector: "null"
               streams.image.registry: "{{ .IMAGE_DOMAIN_kstreams_gradleapp }}"
               streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_gradleapp }}"
               streams.image.tag: "{{ .IMAGE_TAG_kstreams_gradleapp }}"
+            valuesFiles:
+              - values/gradleapp/value.yaml
 
   - name: my-first-streams
     patches:
@@ -75,13 +77,14 @@ profiles:
           - name: kstreams-my-first-streams
             chartPath: chartrepo/kstreams-0.0.3.tgz
             skipBuildDependencies: true
-            valuesFiles:
-              - values/my-first-streams/value.yaml
             setValueTemplates:
               streams.kafka.readinessCheck.enabled: false
+              streams.nodeSelector: "null"
               streams.image.registry: "{{ .IMAGE_DOMAIN_kstreams_my_first_streams }}"
               streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_my_first_streams }}"
               streams.image.tag: "{{ .IMAGE_TAG_kstreams_my_first_streams }}"
+            valuesFiles:
+              - values/my-first-streams/value.yaml
 
 
   - name: branch-deprecated
@@ -97,13 +100,14 @@ profiles:
           - name: kstreams-branch-deprecated
             chartPath: chartrepo/kstreams-0.0.3.tgz
             skipBuildDependencies: true
-            valuesFiles:
-              - values/0-branch-deprecated/value.yaml
             setValueTemplates:
               streams.kafka.readinessCheck.enabled: false
+              streams.nodeSelector: "null"
               streams.image.registry: "{{ .IMAGE_DOMAIN_branch_deprecated }}"
               streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_branch_deprecated }}"
               streams.image.tag: "{{ .IMAGE_TAG_branch_deprecated }}"
+            valuesFiles:
+              - values/0-branch-deprecated/value.yaml
 
   - name: branch-split
     patches:
@@ -118,10 +122,11 @@ profiles:
           - name: kstreams-branch-split
             chartPath: chartrepo/kstreams-0.0.3.tgz
             skipBuildDependencies: true
-            valuesFiles:
-              - values/branch-split/value.yaml
             setValueTemplates:
               streams.kafka.readinessCheck.enabled: false
+              streams.nodeSelector: "null"
               streams.image.registry: "{{ .IMAGE_DOMAIN_branch_split }}"
               streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_branch_split }}"
               streams.image.tag: "{{ .IMAGE_TAG_branch_split }}"
+            valuesFiles:
+              - values/branch-split/value.yaml
