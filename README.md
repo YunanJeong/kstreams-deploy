@@ -56,3 +56,8 @@ helm install mavenapp chartrepo/kstreams-0.0.3.tgz -f values/mavenapp/value.yaml
 # envsubst < {value} | helm install {릴리즈이름} {차트] -f -
 envsubst < mavenapp/value.yaml | helm install kstreams-mvaenapp ../chartrepo/kstreams-0.0.4.tgz -f -
 ```
+
+## 참고
+
+- 스트림즈 DSL에서 입력토픽으로 regex사용가능 (Java Pattern클래스 활용)
+  - 입력토픽 argument 자리에 String 대신 Pattern입력 가능함
