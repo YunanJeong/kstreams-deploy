@@ -61,3 +61,4 @@ envsubst < mavenapp/value.yaml | helm install kstreams-mvaenapp ../chartrepo/kst
 
 - 스트림즈 DSL에서 입력토픽으로 regex사용가능 (Java Pattern클래스 활용)
   - 입력토픽 argument 자리에 String 대신 Pattern입력 가능함
+  - 예시: [values/my-first-streams 참고](https://github.com/YunanJeong/kafka-streams-deploy/blob/main/values/my-first-streams/image/app/src/main/java/my_first_streams/App.java)
