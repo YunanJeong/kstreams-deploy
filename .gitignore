@@ -9,3 +9,6 @@ build
 .gitattributes
 .vscode
 helm/charts
+
+# 자동생성되는 자바 바이너리 파일들 업로드 제외
+**/bin
