@@ -1,0 +1,26 @@
+#
+# 헬름차트 kstreams-0.0.5 기준
+#
+streams:
+  replicas: 1
+  podAnnotations: {}
+  affinity: {}
+  tolerations: {}
+  resources: {}
+  nodeSelector: {}
+    # kr-daw/noderole: kafka
+
+  # Your Streams App Image.
+  image:
+    registry: private.docker.wai
+    repository: "yunan/kstreams-mavenapp-java17"
+    tag: 0.0.1
+
+    
+  kafka: 
+    # Your Kafka Broker API
+    server: "testbed-kafka-headless:9092"
+    # If true, Streams waits Kafka
+    readinessCheck:
+      enabled: true
+      # image: 

@@ -19,7 +19,30 @@ deploy:
                                  # 우선순위 skaffold CLI options > setValueTemplates > valuesFiles
 
 # skaffold 실행시 profile을 선택하여 위 build, deploy 등에 Override할 수 있다.
+
 profiles:
+  - name: mavenapp-java17  # java17, streams 및 기타 종속성들 전부 최신화한 샘플
+    patches:
+      - op: add
+        path: /build/artifacts
+        value:
+          - image: kstreams-mavenapp-java17
+            context: values/mavenapp-java17/image/
+      - op: add
+        path: /deploy/helm/releases
+        value:
+          - name: kstreams-mavenapp-java17-sample
+            chartPath: chartrepo/kstreams-0.0.5.tgz
+            skipBuildDependencies: true
+            setValueTemplates:
+              streams.kafka.readinessCheck.enabled: false
+              streams.nodeSelector: "null"
+              streams.image.registry:   "{{ .IMAGE_DOMAIN_kstreams_mavenapp_java17 }}"
+              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_mavenapp_java17 }}"
+              streams.image.tag:        "{{ .IMAGE_TAG_kstreams_mavenapp_java17 }}" 
+            valuesFiles:
+              - values/mavenapp-java17/value.yaml
+
   - name: mavenapp
     patches:
       - op: add
