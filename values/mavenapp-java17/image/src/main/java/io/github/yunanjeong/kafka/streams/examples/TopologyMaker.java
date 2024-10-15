@@ -9,7 +9,7 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Produced;
-
+import org.apache.kafka.streams.processor.TopicNameExtractor;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -17,16 +17,21 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
-
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 
 public class TopologyMaker {
     
     private static final String mSrcTopic = "original_topicname";
     private static final String mSinkTopic = "output_topicname";
+    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final DateTimeFormatter INPUT_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter OUTPUT_FORMAT = DateTimeFormatter.ofPattern("_yyyyMMdd");
+
     StreamsBuilder streamsBuilder = new StreamsBuilder();
     JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();
-    ObjectMapper mapper = new ObjectMapper();
+    
 
     public Topology getMyTopology() throws NoSuchAlgorithmException {
 
@@ -57,9 +62,9 @@ public class TopologyMaker {
                 
                 Map<String, Object> map = new HashMap<>();
                 map.put("uid", uid);
-                JsonNode resultKey = mapper.valueToTree(map);
                 map.put("message", body);
                 map.put("datetime", time);
+                JsonNode resultKey = mapper.valueToTree(map);
                 JsonNode resultValue = mapper.valueToTree(map);
 
                 return KeyValue.pair(resultKey, resultValue);
@@ -68,9 +73,20 @@ public class TopologyMaker {
                 return KeyValue.pair(null, jsonNode);
             }
         });
-        
+        TopicNameExtractor<String, JsonNode> multipleOutputTopicName = (key, value, recordContext) -> {
+            // 출력토픽명을 동적으로 정의 및 반환하는 람다표현식(변수)
+            // 이걸 outputSteram.to()의 outputTopic 자리에 입력시 동적 토픽 출력이 가능
+            String suffix = getDateSuffix(value.get("payload").get("dteventtime").asText());
+            return mSinkTopic + suffix;
+        };
         outputStream.to(mSinkTopic, Produced.with(jsonNodeSerde, jsonNodeSerde));
         return streamsBuilder.build();
+    }
+
+    public String getDateSuffix(String dateTime){
+        // "yyyy-MM-dd HH:mm:ss"을 "_yyyyMMdd"로 반환
+        LocalDateTime date = LocalDateTime.parse(dateTime, INPUT_FORMAT);
+        return date.format(OUTPUT_FORMAT);
     }
 
 }
