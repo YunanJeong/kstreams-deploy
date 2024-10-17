@@ -37,12 +37,15 @@ public class TopologyMaker {
     private static final DateTimeFormatter OUTPUT_FORMAT = DateTimeFormatter.ofPattern("_yyyyMMdd");
     
     // JAVA 15 이상에서 TEXT BLOCKS 지원
+    // schema registry를 사용하지않고 그냥 record에 schema를 넣을 때 다음과 같은 형식으로 쓰면된다.
+    // 카프카 지원 스키마 타입: https://kafka.apache.org/20/javadoc/org/apache/kafka/connect/data/Schema.Type.html
+    // 사용가능한 시간 형식: https://kafka.apache.org/20/javadoc/org/apache/kafka/connect/data/package-summary.html
     private static final String SCHEMA_STRING = """ 
         {
             "type": "struct",
             "fields": [
                 {"field": "svrid", "type": "int32"},
-                {"field": "dteventtime", "type": "string"},
+                {"field": "dteventtime", "type": "string", "name": "org.apache.kafka.connect.data.Timestamp" },
                 {"field": "loguuid", "type": "int64"},
                 {"field": "content", "type": "string"}
             ]
