@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 public class App {
 

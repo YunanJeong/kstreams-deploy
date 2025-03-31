@@ -27,7 +27,7 @@ profiles:
         path: /build/artifacts
         value:
           - image: kstreams-mavenapp-java17
-            context: values/mavenapp-java17/image/
+            context: values/5-mavenapp-java17/image/
       - op: add
         path: /deploy/helm/releases
         value:
@@ -41,7 +41,7 @@ profiles:
               streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_mavenapp_java17 }}"
               streams.image.tag:        "{{ .IMAGE_TAG_kstreams_mavenapp_java17 }}" 
             valuesFiles:
-              - values/mavenapp-java17/value.yaml
+              - values/5-mavenapp-java17/value.yaml
 
   - name: mavenapp
     patches:
@@ -49,7 +49,7 @@ profiles:
         path: /build/artifacts
         value:
           - image: kstreams-mavenapp   
-            context: values/mavenapp/image/
+            context: values/4-mavenapp/image/
       - op: add
         path: /deploy/helm/releases
         value:
@@ -63,7 +63,7 @@ profiles:
               streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_mavenapp }}"
               streams.image.tag: "{{ .IMAGE_TAG_kstreams_mavenapp }}" 
             valuesFiles:
-              - values/mavenapp/value.yaml
+              - values/4-mavenapp/value.yaml
       
   - name: gradleapp
     patches:
@@ -71,7 +71,7 @@ profiles:
         path: /build/artifacts
         value:
           - image: kstreams-gradleapp   
-            context: values/gradleapp/image/
+            context: values/3-gradleapp/image/
       - op: add
         path: /deploy/helm/releases
         value:
@@ -85,7 +85,7 @@ profiles:
               streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_gradleapp }}"
               streams.image.tag: "{{ .IMAGE_TAG_kstreams_gradleapp }}"
             valuesFiles:
-              - values/gradleapp/value.yaml
+              - values/3-gradleapp/value.yaml
 
   - name: my-first-streams
     patches:
@@ -93,7 +93,7 @@ profiles:
         path: /build/artifacts
         value:
           - image: kstreams-my-first-streams   
-            context: values/my-first-streams/image/
+            context: values/0-filter/image/
       - op: add
         path: /deploy/helm/releases
         value:
@@ -107,7 +107,7 @@ profiles:
               streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_my_first_streams }}"
               streams.image.tag: "{{ .IMAGE_TAG_kstreams_my_first_streams }}"
             valuesFiles:
-              - values/my-first-streams/value.yaml
+              - values/0-filter/value.yaml
 
 
   - name: branch-deprecated
@@ -116,7 +116,7 @@ profiles:
         path: /build/artifacts
         value:
           - image: kstreams-branch-deprecated
-            context: values/0-branch-deprecated/image/
+            context: values/1-branch-deprecated/image/
       - op: add
         path: /deploy/helm/releases
         value:
@@ -130,7 +130,7 @@ profiles:
               streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_branch_deprecated }}"
               streams.image.tag: "{{ .IMAGE_TAG_branch_deprecated }}"
             valuesFiles:
-              - values/0-branch-deprecated/value.yaml
+              - values/1-branch-deprecated/value.yaml
 
   - name: branch-split
     patches:
@@ -138,7 +138,7 @@ profiles:
         path: /build/artifacts
         value:
           - image: kstreams-branch-split   
-            context: values/1-branch-split/image/
+            context: values/2-branch-split/image/
       - op: add
         path: /deploy/helm/releases
         value:
@@ -152,4 +152,4 @@ profiles:
               streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_branch_split }}"
               streams.image.tag: "{{ .IMAGE_TAG_branch_split }}"
             valuesFiles:
-              - values/branch-split/value.yaml
+              - values/2-branch-split/value.yaml

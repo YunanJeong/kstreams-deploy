@@ -1,4 +1,4 @@
-package com.webzen.gitlabai.kafka.streams;
+package io.github.yunanjeong.kafka.streams.examples;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter;
 // import java.util.HashMap;
 // import java.util.UUID;
 import java.util.Map;
-import com.webzen.gitlabai.kafka.streams.serdes.JsonNodeSerde;
+import io.github.yunanjeong.kafka.streams.examples.serdes.JsonNodeSerde;
 
 
 public class TopologyMaker {
