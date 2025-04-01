@@ -21,6 +21,28 @@ deploy:
 # skaffold 실행시 profile을 선택하여 위 build, deploy 등에 Override할 수 있다.
 
 profiles:
+  - name: json-check-error-routing
+    patches:
+      - op: add
+        path: /build/artifacts
+        value:
+          - image: kstreams-json-check-error-routing
+            context: values/6-json-check-error-routing/image/
+      - op: add
+        path: /deploy/helm/releases
+        value:
+          - name: kstreams-mavenapp-java17-sample
+            chartPath: chartrepo/kstreams-0.0.5.tgz
+            skipBuildDependencies: true
+            setValueTemplates:
+              streams.kafka.readinessCheck.enabled: false
+              streams.nodeSelector: "null"
+              streams.image.registry:   "{{ .IMAGE_DOMAIN_kstreams_mavenapp_java17 }}"
+              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_mavenapp_java17 }}"
+              streams.image.tag:        "{{ .IMAGE_TAG_kstreams_mavenapp_java17 }}" 
+            valuesFiles:
+              - values/6-json-check-error-routing/value.yaml
+
   - name: mavenapp-java17  # java17, streams 및 기타 종속성들 전부 최신화한 샘플
     patches:
       - op: add
@@ -93,7 +115,7 @@ profiles:
         path: /build/artifacts
         value:
           - image: kstreams-my-first-streams   
-            context: values/0-filter/image/
+            context: values/0-filter-multitopic-regex/image/
       - op: add
         path: /deploy/helm/releases
         value:
@@ -107,7 +129,7 @@ profiles:
               streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_my_first_streams }}"
               streams.image.tag: "{{ .IMAGE_TAG_kstreams_my_first_streams }}"
             valuesFiles:
-              - values/0-filter/value.yaml
+              - values/0-filter-multitopic-regex/value.yaml
 
 
   - name: branch-deprecated
