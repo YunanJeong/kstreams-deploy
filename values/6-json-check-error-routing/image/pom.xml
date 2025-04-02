@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.yunanjeong.kafka.streams.examples</groupId>
+    <groupId>io.github.yunanjeong.kafka.streams</groupId>
     <artifactId>kstreams</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <!-- 빌드 단계에 쓰는 종속성들. dependency에 적어도되는데 build로 넣어주는게 일반적 -->
@@ -37,7 +37,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>io.github.yunanjeong.kafka.streams.examples.App</mainClass>
+                            <mainClass>io.github.yunanjeong.kafka.streams.App</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

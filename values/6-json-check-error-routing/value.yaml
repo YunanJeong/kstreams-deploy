@@ -2,7 +2,7 @@
 # 헬름차트 kstreams-0.0.5 기준
 #
 streams:
-  replicas: 1
+  replicas: 1   # Pod늘렸을 때 Consumer Group명만 같으면 개발자가 별도 로직을 쓰지 않아도, Kafka가 자동으로 분산처리해줌
   podAnnotations: {}
   affinity: {}
   tolerations: {}
@@ -13,7 +13,7 @@ streams:
   image:
     registry: docker.wai
     repository: "yunan/kstreams-json-check-error-routing"
-    tag: 0.0.1
+    tag: test # 0.0.1
 
   # 환경변수
   # Streams앱 수정없이 helm value에서 변경할 내용들을 환경변수로 처리 (e.g. consumer group 이름, input output 토픽 등)
@@ -26,18 +26,20 @@ streams:
         #  consumer-group이 있으면 아무리 재실행해도 consumer-group의 설정을 따름
         #  보통 consumer의 default는 latest이지만, <<KStreams에서의 default는 earliest임>>
 
-    CONSUMER_GROUP: "my-consumer-group"  
-    # INPUT_TOPIC: "my-input-topic"  
-    INPUT_TOPIC_REGEX: "fltd.tb.live"
-    OUTPUT_TOPIC_S3: "s3.fltd.tb.live"
-    # consumer group 이름, input output 토픽을 동적으로 수정하고 싶을시, 환경변수로 처리하자.
+
+    # consumer-group명, input,output 토픽명을 동적으로 수정하고 싶을시, 환경변수로 처리하자.
     # java코드와 연계된 부분은 가급적 환경변수로 처리
     # 개별 helm value 항목은 생성 ㄴㄴ 적절치 않음
+    CONSUMER_GROUP: "my-consumer-group"  
+    # INPUT_TOPIC: "my-input-topic"  
+    INPUT_TOPIC_REGEX: "test-.*"
+    OUTPUT_TOPIC_S3: "parsed.test-topic"
+    ERROR_TOPIC: "error.test-topic"
     
   kafka: 
     # Your Kafka Broker API
     server: "test-kafka:9092"
     # If true, Streams waits Kafka
     readinessCheck:
-      enabled: true
+      enabled: false
       # image: 
