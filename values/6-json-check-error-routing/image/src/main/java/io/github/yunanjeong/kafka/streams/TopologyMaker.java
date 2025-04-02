@@ -31,7 +31,7 @@ public class TopologyMaker { // extends Security
     private static final Logger logger = LoggerFactory.getLogger(TopologyMaker.class);
 
     // 토픽명 환경변수는 helm value파일에서 관리
-    private static final Pattern INPUT_TOPIC_REGEX = Pattern.compile("INPUT_TOPIC_REGEX");  
+    private static final Pattern INPUT_TOPIC_REGEX = Pattern.compile(System.getenv("INPUT_TOPIC_REGEX"));  
     // private static final String INPUT_TOPIC = System.getenv("INPUT_TOPIC"); 
     private static final String OUTPUT_TOPIC_S3 = System.getenv("OUTPUT_TOPIC_S3");
     private static final String ERROR_TOPIC = System.getenv("ERROR_TOPIC");    
@@ -92,29 +92,7 @@ public class TopologyMaker { // extends Security
         }
     }
 
-    private KStream<String, JsonNode> processValidStream(KStream<String, JsonNode> stream) {
-        logger.info("Processing Valid Stream ... ");
-        if (stream == null) {
-            return null;
-        }
 
-        KStream<String, JsonNode> outputStream = stream.map((key, jsonNode) -> {
-            try {
-                ObjectNode payloadNode = objectMapper.createObjectNode();
-                payloadNode.put("svrid", jsonNode.get("SvrId").asInt());
-                payloadNode.put("dteventtime", jsonNode.get("dtEventTime").asText());
-                payloadNode.put("loguuid", jsonNode.get("LogUUID").asLong());
-                payloadNode.put("content", jsonNode.get("Content").asText());
-
-                return KeyValue.pair(key, payloadNode);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return KeyValue.pair(key, null);
-            }
-        });
-
-        return outputStream;
-    }
     // # filebeat 랩핑 메시지 필드 명세
     // # # fields: filebeat 커스텀설정으로 남긴것
     // # # log: filebeat가 수집한 파일의 경로와 오프셋
