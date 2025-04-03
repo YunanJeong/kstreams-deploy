@@ -42,7 +42,7 @@ public class FilebeatJsonDes implements Serde<JsonNode> {
     public static class JsonDeserializer implements Deserializer<JsonNode> {
         // filebeat 랩핑 메시지 필드 명세
         //  # fields: filebeat 커스텀설정으로 남긴것
-        //  # log: filebeat가 수집한 파일의 경로와 오프셋
+        //  # log(or source): filebeat가 수집한 파일의 경로와 오프셋
         //  # message: 원본파일로그(비즈니스 데이터)
         @Override
         public JsonNode deserialize(String topic, byte[] data) {

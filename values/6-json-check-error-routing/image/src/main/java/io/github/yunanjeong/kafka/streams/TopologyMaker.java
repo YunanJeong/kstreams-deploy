@@ -109,7 +109,7 @@ public class TopologyMaker { // extends Security
 
     // # filebeat 랩핑 메시지 필드 명세
     // # # fields: filebeat 커스텀설정으로 남긴것
-    // # # log: filebeat가 수집한 파일의 경로와 오프셋
+    // # # log(or source): filebeat가 수집한 파일의 경로와 오프셋
     // # # message: 원본파일로그 내용 (json검증 및 에러 라우팅 필요)
 
 }
