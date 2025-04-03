@@ -1,5 +1,6 @@
 package io.github.yunanjeong.kafka.streams;
 import io.github.yunanjeong.kafka.streams.serdes.JsonNodeSerde;
+import io.github.yunanjeong.kafka.streams.serdes.FilebeatJsonDes;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
@@ -39,7 +40,26 @@ public class TopologyMaker { // extends Security
     private StreamsBuilder streamsBuilder = new StreamsBuilder();
     private JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();
     private ObjectMapper objectMapper = new ObjectMapper();
-    
+    private FilebeatJsonDes filebeatJsonDes = new FilebeatJsonDes();
+
+    public Topology getFilebeatTopology() throws NoSuchAlgorithmException {
+        logger.info("Streams Start");
+        KStream<String, JsonNode> inputStream = streamsBuilder.stream(
+            INPUT_TOPIC_REGEX,
+            Consumed.with(Serdes.String(), filebeatJsonDes)
+        );
+
+        // message가 json이면 S3용 토픽으로, 아니면 에러토픽으로 전송 후 제거(consume)
+        Map<String, KStream<String,JsonNode>> branches = inputStream.split(Named.as("msg-"))
+            .branch((key, value) -> value.get("error") == null,
+                Branched.withConsumer(stream -> stream.to(OUTPUT_TOPIC_S3, Produced.with(Serdes.String(), jsonNodeSerde)), "s3"))
+            .defaultBranch(
+                Branched.withConsumer(stream -> stream.to(ERROR_TOPIC, Produced.with(Serdes.String(), jsonNodeSerde)), "error")
+            );
+
+        return streamsBuilder.build();
+    }
+
     public Topology getMyTopology() throws NoSuchAlgorithmException {
         logger.info("Streams Start");
         KStream<String, JsonNode> inputStream = streamsBuilder.stream(
@@ -74,7 +94,6 @@ public class TopologyMaker { // extends Security
         // withFunction: 조건식에 맞는 스트림을 로직대로 처리하고, 다음 분기로 넘겨줄 결과물 스트림을 명시적으로 return 해야 함.
         // https://kafka.apache.org/28/javadoc/org/apache/kafka/streams/kstream/BranchedKStream.html
         // branches map 접근키는 prefix가 강제됨. 빈 값 불가. 미설정시 default prefix 적용됨
-        
 
         return streamsBuilder.build();
     }
@@ -87,7 +106,6 @@ public class TopologyMaker { // extends Security
             return false;
         }
     }
-
 
     // # filebeat 랩핑 메시지 필드 명세
     // # # fields: filebeat 커스텀설정으로 남긴것

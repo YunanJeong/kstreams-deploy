@@ -34,7 +34,8 @@ public class App {
         logger.info("Starting Main Appication ... Target Kafka Broker: " + broker);
 
         TopologyMaker topologyMaker = new TopologyMaker();
-        Topology topology = topologyMaker.getMyTopology();
+        // Topology topology = topologyMaker.getMyTopology();
+        Topology topology = topologyMaker.getFilebeatTopology();
         KafkaStreams kafkaStreams = new KafkaStreams(topology, props);
         
         //AdminClient 및 NewTopic 클래스로 Kafka에 Sink Topic 생성가능
