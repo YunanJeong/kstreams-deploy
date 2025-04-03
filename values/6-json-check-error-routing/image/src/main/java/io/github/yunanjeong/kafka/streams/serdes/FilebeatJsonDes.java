@@ -8,19 +8,35 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 
-public class JsonNodeSerde implements Serde<JsonNode> {
+public class FilebeatJsonDes implements Serde<JsonNode> {
 
     // ObjectMapper는 thread-safe하므로 static final로 선언
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private final JsonSerializer serializer;
     private final JsonDeserializer deserializer;
 
-    public JsonNodeSerde() {
+    public FilebeatJsonDes() {
+        this.serializer = new JsonSerializer();
         this.deserializer = new JsonDeserializer();
+    }
+
+    @Override
+    public Serializer<JsonNode> serializer() {
+        return this.serializer;
     }
 
     @Override
     public Deserializer<JsonNode> deserializer() {
         return this.deserializer;
+    }
+
+    public static class JsonSerializer implements Serializer<JsonNode> {
+        
+        @Override
+        public byte[] serialize(String topic, JsonNode data) {
+            // serialize 사용하지 않음
+            return null;
+        }
     }
 
     public static class JsonDeserializer implements Deserializer<JsonNode> {
