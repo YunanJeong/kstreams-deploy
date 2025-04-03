@@ -56,10 +56,6 @@ public class TopologyMaker { // extends Security
             );
         
         // filebeat 랩핑 메시지 중 message 필드만 추출  // message 필드 내부도 json 검증이 필요
-        System.err.println("inputBranches Keys>>>>: " + inputBranches.keySet()   );
-        System.err.println("inputBranches size>>>>: " + inputBranches.size()   );
-
-        System.err.println("check validStream>>>>: " + inputBranches.get("input-valid"));
         KStream<String, JsonNode> validStream = inputBranches.get("input-valid");
         KStream<String, String> msgStream = validStream.mapValues(
             value -> value.get("message").asText()
