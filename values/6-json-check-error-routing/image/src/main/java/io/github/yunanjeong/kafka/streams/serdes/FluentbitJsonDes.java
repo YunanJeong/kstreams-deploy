@@ -44,9 +44,17 @@ public class FluentbitJsonDes implements Serde<JsonNode> {
         @Override
         public JsonNode deserialize(String topic, byte[] data) {
             try {
-                JsonNode fluentbitNode = objectMapper.readTree(data);
-                JsonNode logNode = fluentbitNode.get("log");              
-                return objectMapper.readTree(logNode.asText());
+                JsonNode fluentbitJsonNode = objectMapper.readTree(data);
+                String logStr = fluentbitJsonNode.get("log").asText();
+                
+                // Json 검증 후 Return
+                JsonNode logJsonNode = objectMapper.readTree(logStr);
+                if (logJsonNode.isObject() || logJsonNode.isArray()){
+                    return logJsonNode;
+                }else{
+                    throw new IllegalArgumentException("필드값이 JsonNode는 맞는데, Json은 아님") ;
+                }
+                
             } catch (Exception e) {
                 e.printStackTrace();
                 

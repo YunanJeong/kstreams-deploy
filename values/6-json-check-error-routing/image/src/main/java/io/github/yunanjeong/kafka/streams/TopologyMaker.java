@@ -83,7 +83,7 @@ public class TopologyMaker { // extends Security
         
         // message가 json이면 S3용 토픽으로, 아니면 에러토픽으로 전송 후 제거(consume)
         Map<String, KStream<String,String>> msgBranches = msgStream.split(Named.as("msg-"))
-            .branch((key, value) -> isJson(value),
+            .branch((key, value) -> isValidJsonString(value),
                 Branched.withConsumer(stream -> stream.to(OUTPUT_TOPIC_S3, Produced.with(Serdes.String(), Serdes.String())), "s3"))
             .defaultBranch(
                 Branched.withConsumer(stream -> stream.to(ERROR_TOPIC, Produced.with(Serdes.String(), Serdes.String())), "error")
@@ -98,11 +98,13 @@ public class TopologyMaker { // extends Security
         return streamsBuilder.build();
     }
 
-    private boolean isJson(String content) {
+    private boolean isValidJsonString(String content) {
         try {
-            objectMapper.readTree(content);
-            return true;
-        } catch (JsonProcessingException e) {
+            JsonNode node = objectMapper.readTree(content);
+            // 단일 문자열, 숫자, boolean, null 등은 Json이 아니지만, JsonNode로 취급되므로 다음 로직을 통해 제외시켜준다.
+            // isObject()는 JsonNode가 ObjectNode({})인지 확인 // isArray()는 JsonNode가 ArrayNode([])인지 확인
+            return node.isObject() || node.isArray();
+        } catch (Exception e) {
             return false;
         }
     }

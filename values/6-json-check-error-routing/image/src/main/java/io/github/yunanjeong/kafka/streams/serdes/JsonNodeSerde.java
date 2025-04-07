@@ -48,7 +48,12 @@ public class JsonNodeSerde implements Serde<JsonNode> {
         @Override
         public JsonNode deserialize(String topic, byte[] data) {
             try {
-                return objectMapper.readTree(data);
+                JsonNode dataJsonNode = objectMapper.readTree(data);
+                if (dataJsonNode.isObject() || dataJsonNode.isArray()){
+                    return dataJsonNode;
+                }else{
+                    throw new IllegalArgumentException("JsonNode는 맞는데, Json은 아님") ;
+                }
             } catch (Exception e) {
                 e.printStackTrace();
 

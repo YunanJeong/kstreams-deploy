@@ -47,15 +47,23 @@ public class FilebeatJsonDes implements Serde<JsonNode> {
         @Override
         public JsonNode deserialize(String topic, byte[] data) {
             try {
-                JsonNode filebeatNode = objectMapper.readTree(data);
-                JsonNode messageNode = filebeatNode.get("message");              
-                return objectMapper.readTree(messageNode.asText());
+                JsonNode filebeatJsonNode = objectMapper.readTree(data);
+                String messageStr = filebeatJsonNode.get("message").asText();
+                
+                // message 필드값이 Json인 경우
+                JsonNode messageJsonNode = objectMapper.readTree(messageStr);
+                if (messageJsonNode.isObject() || messageJsonNode.isArray()){
+                    return messageJsonNode;
+                }else{
+                    throw new IllegalArgumentException("필드값이 JsonNode는 맞는데, Json은 아님") ;
+                }
+                
             } catch (Exception e) {
                 e.printStackTrace();
                 
                 // filebeat 랩핑 메시지가 Json이 아닌 경우
                 // message 필드값이 Json이 아닌 경우
-                // message 필드가 없는 경우
+                // message 필드가 없는 경우 등
 
                 // 오류 정보를 포함한 JSON 객체로 반환
                 ObjectNode errorNode = objectMapper.createObjectNode();
