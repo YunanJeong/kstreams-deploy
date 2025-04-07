@@ -50,7 +50,7 @@ public class FilebeatJsonDes implements Serde<JsonNode> {
                 JsonNode filebeatJsonNode = objectMapper.readTree(data);
                 String messageStr = filebeatJsonNode.get("message").asText();
                 
-                // message 필드값이 Json인 경우
+                // Json 검증 후 Return
                 JsonNode messageJsonNode = objectMapper.readTree(messageStr);
                 if (messageJsonNode.isObject() || messageJsonNode.isArray()){
                     return messageJsonNode;
