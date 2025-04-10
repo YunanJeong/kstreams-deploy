@@ -12,7 +12,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 public class App {
 
-    private static final Logger logger = LoggerFactory.getLogger(App.class);
+    private static final Logger LOG = LoggerFactory.getLogger(App.class);
 
     public static void main(final String[] args) throws NoSuchAlgorithmException {
         String consumerGroup = System.getenv("CONSUMER_GROUP");
@@ -31,9 +31,13 @@ public class App {
             props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset); 
         }
 
-        logger.info("Starting Main Appication ... Target Kafka Broker: " + broker);
-        logger.warn("warning test");
-        logger.error("error test");
+        LOG.info("Starting Main Appication ... Target Kafka Broker: " + broker);
+
+        LOG.debug("App debug test");
+        LOG.info("App info test");
+        LOG.warn("App warn test");
+        LOG.error("App error test");
+        
         System.out.println("just print");
         System.err.println("just print error");
 

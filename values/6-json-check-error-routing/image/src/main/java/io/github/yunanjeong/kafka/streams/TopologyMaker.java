@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 // import java.util.regex.Pattern;
 // import java.util.HashMap;
 // import java.util.Map;
@@ -43,11 +42,13 @@ public class TopologyMaker { // extends Security
     private FilebeatJsonDes filebeatJsonDes = new FilebeatJsonDes();
 
     public Topology getFilebeatTopology() throws NoSuchAlgorithmException {
-        LOG.info("Streams Start");
+        // LOG.info("Streams Start");
 
-        LOG.info("Starting Main Appication ... Target Kafka Broker: " );
-        LOG.warn("warning test");
-        LOG.error("error test");
+        LOG.debug("App debug test");
+        LOG.info("App info test");
+        LOG.warn("App warn test");
+        LOG.error("App error test");
+
         System.out.println("just print");
         System.err.println("just print error");
         KStream<String, JsonNode> inputStream = streamsBuilder.stream(
