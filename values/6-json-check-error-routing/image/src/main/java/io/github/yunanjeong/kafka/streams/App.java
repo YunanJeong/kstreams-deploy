@@ -32,6 +32,10 @@ public class App {
         }
 
         logger.info("Starting Main Appication ... Target Kafka Broker: " + broker);
+        logger.warn("warning test");
+        logger.error("error test");
+        System.out.println("just print");
+        System.err.println("just print error");
 
         TopologyMaker topologyMaker = new TopologyMaker();
         // Topology topology = topologyMaker.getMyTopology();

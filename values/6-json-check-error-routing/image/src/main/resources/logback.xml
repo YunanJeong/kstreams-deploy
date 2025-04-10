@@ -1,11 +1,97 @@
 <configuration>
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}|[%thread]|%-5level|%logger{36}|%msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
+    
+    <!-- 내가 직접 작성한 로그 중 info급 이상만 출력 -->
+    <logger name="your.package.name" level="info">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <!-- 내가 직접 작성한 로그 중 debug급 이상만 출력. 개발시 사용 -->
+    <!-- <logger name="your.package.name" level="debug">
+        <appender-ref ref="STDOUT" />
+    </logger> -->
 
-    <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
+
+    <!-- 내가 작성하지 않은, 라이브러리 내 기본 로그는 warn급 이상만 출력 -->
+    <root level="warn">
+        <appender-ref ref="STDOUT" />
     </root>
 </configuration>
+
+<!--
+TRACE: 가장 상세한 로그 정보
+       주로 세부적인 디버깅을 위해 사용
+       (가장 낮은 등급)
+-->
+
+<!--
+DEBUG: 디버깅을 위한 정보
+       개발 중에 유용한 정보를 제공
+-->
+
+<!--
+INFO: 일반적인 정보 메시지
+      애플리케이션의 정상적인 동작을 나타냄
+-->
+
+<!--
+WARN: 경고 메시지
+      잠재적인 문제를 나타내지만, 애플리케이션은 계속 동작 가능
+-->
+
+<!--
+ERROR: 오류 메시지
+       애플리케이션의 기능에 문제가 발생했음을 나타냄
+-->
+
+<!--
+FATAL: Log4j에서 사용되는 치명적인 오류 레벨
+       애플리케이션이 중단될 수 있는 심각한 문제를 나타냄
+       (SLF4J에는 FATAL 레벨이 없고, ERROR로 대체됨)
+       (가장 높은 등급)
+-->
+
+
+<!-- <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+  <providers>
+  
+    <timestamp>
+      <fieldName>timestamp</fieldName>
+      <pattern>yyyy-MM-dd'T'HH:mm:ss.SSSZ</pattern>
+      <timeZone>Asia/Seoul</timeZone>
+    </timestamp>
+    
+    <logLevel>
+      <fieldName>level</fieldName>
+    </logLevel>
+
+    <loggerName>
+      <fieldName>logger</fieldName>
+      <shortenedLoggerNameLength>30</shortenedLoggerNameLength> 
+    </loggerName>
+
+    <message>
+      <fieldName>message</fieldName>
+    </message>
+
+    <threadName>
+      <fieldName>thread</fieldName>
+    </threadName>
+
+    <mdc>
+      <includeMdcKeyName>userId</includeMdcKeyName> 
+    </mdc>
+
+    <stackTrace>
+      <fieldName>stacktrace</fieldName>
+      <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+        <maxDepthPerThrowable>30</maxDepthPerThrowable>
+        <rootCauseFirst>true</rootCauseFirst>
+      </throwableConverter>
+    </stackTrace>
+
+  </providers>
+</encoder> -->

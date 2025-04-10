@@ -29,8 +29,9 @@ import java.util.regex.Pattern;
 
 public class TopologyMaker { // extends Security
     
-    private static final Logger logger = LoggerFactory.getLogger(TopologyMaker.class);
-
+    private static final Logger LOG = LoggerFactory.getLogger(TopologyMaker.class);
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    
     // 토픽명 환경변수는 helm value파일에서 관리
     private static final Pattern INPUT_TOPIC_REGEX = Pattern.compile(System.getenv("INPUT_TOPIC_REGEX"));  
     // private static final String INPUT_TOPIC = System.getenv("INPUT_TOPIC"); 
@@ -39,11 +40,16 @@ public class TopologyMaker { // extends Security
     
     private StreamsBuilder streamsBuilder = new StreamsBuilder();
     private JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();
-    private ObjectMapper objectMapper = new ObjectMapper();
     private FilebeatJsonDes filebeatJsonDes = new FilebeatJsonDes();
 
     public Topology getFilebeatTopology() throws NoSuchAlgorithmException {
-        logger.info("Streams Start");
+        LOG.info("Streams Start");
+
+        LOG.info("Starting Main Appication ... Target Kafka Broker: " );
+        LOG.warn("warning test");
+        LOG.error("error test");
+        System.out.println("just print");
+        System.err.println("just print error");
         KStream<String, JsonNode> inputStream = streamsBuilder.stream(
             INPUT_TOPIC_REGEX,
             Consumed.with(Serdes.String(), filebeatJsonDes)
@@ -61,7 +67,7 @@ public class TopologyMaker { // extends Security
     }
 
     public Topology getMyTopology() throws NoSuchAlgorithmException {
-        logger.info("Streams Start");
+        LOG.info("Streams Start");
         KStream<String, JsonNode> inputStream = streamsBuilder.stream(
             INPUT_TOPIC_REGEX,
             Consumed.with(Serdes.String(), jsonNodeSerde)
