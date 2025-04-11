@@ -113,7 +113,7 @@ public class TopologyMaker { // extends Security
             // isObject()는 JsonNode가 ObjectNode({})인지 확인 // isArray()는 JsonNode가 ArrayNode([])인지 확인
             return node.isObject() || node.isArray();
         } catch (Exception e) {
-            LOG.warn("Json 검증 실패", e);
+            e.printStackTrace();
             return false;
         }
     }
