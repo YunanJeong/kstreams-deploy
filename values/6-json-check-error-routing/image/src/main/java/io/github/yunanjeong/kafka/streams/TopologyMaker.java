@@ -42,15 +42,12 @@ public class TopologyMaker { // extends Security
     private FilebeatJsonDes filebeatJsonDes = new FilebeatJsonDes();
 
     public Topology getFilebeatTopology() throws NoSuchAlgorithmException {
-        // LOG.info("Streams Start");
+        
+        // 이 로그는 스트림즈 실행시 최초 1회만 실행됨  
+        // 여기는 스트림 처리 방법을 정의하는 틀(Topology)을 만드는 곳이기 때문
+        // Record마다 특정 로직(로깅)을 처리하려면 KStream 객체의 메소드 peek()를 사용해야 함 (Record 마다 적용되므로 부하 주의!!)
+        LOG.info("Getting Topology ... ");
 
-        LOG.debug("App debug test");
-        LOG.info("App info test");
-        LOG.warn("App warn test");
-        LOG.error("App error test");
-
-        System.out.println("just print");
-        System.err.println("just print error");
         KStream<String, JsonNode> inputStream = streamsBuilder.stream(
             INPUT_TOPIC_REGEX,
             Consumed.with(Serdes.String(), filebeatJsonDes)
@@ -61,14 +58,18 @@ public class TopologyMaker { // extends Security
             .branch((key, value) -> value.get("error") == null,
                 Branched.withConsumer(stream -> stream.to(OUTPUT_TOPIC_S3, Produced.with(Serdes.String(), jsonNodeSerde)), "s3"))
             .defaultBranch(
-                Branched.withConsumer(stream -> stream.to(ERROR_TOPIC, Produced.with(Serdes.String(), jsonNodeSerde)), "error")
+                Branched.withConsumer(stream -> { 
+                    // peek()는 데이터 스트림의 변경없이, Record마다 특정로직(로깅) 수행이 필요할 시 사용  // peek없이 그냥 로그찍으면 작동안함
+                    stream.peek((key, value) -> LOG.warn("Sending invalid record to the topic={} ... key={}, value={}" , ERROR_TOPIC, key, value ) )
+                          .to(ERROR_TOPIC, Produced.with(Serdes.String(), jsonNodeSerde));
+                }, "error")
             );
 
         return streamsBuilder.build();
     }
 
     public Topology getMyTopology() throws NoSuchAlgorithmException {
-        LOG.info("Streams Start");
+        LOG.info("Getting Topology ... ");
         KStream<String, JsonNode> inputStream = streamsBuilder.stream(
             INPUT_TOPIC_REGEX,
             Consumed.with(Serdes.String(), jsonNodeSerde)
@@ -112,13 +113,9 @@ public class TopologyMaker { // extends Security
             // isObject()는 JsonNode가 ObjectNode({})인지 확인 // isArray()는 JsonNode가 ArrayNode([])인지 확인
             return node.isObject() || node.isArray();
         } catch (Exception e) {
+            LOG.warn("Json 검증 실패", e);
             return false;
         }
     }
-
-    // # filebeat 랩핑 메시지 필드 명세
-    // # # fields: filebeat 커스텀설정으로 남긴것
-    // # # log(or source): filebeat가 수집한 파일의 경로와 오프셋
-    // # # message: 원본파일로그 내용 (json검증 및 에러 라우팅 필요)
 
 }

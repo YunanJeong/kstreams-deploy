@@ -31,16 +31,6 @@ public class App {
             props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset); 
         }
 
-        LOG.info("Starting Main Appication ... Target Kafka Broker: " + broker);
-
-        LOG.debug("App debug test");
-        LOG.info("App info test");
-        LOG.warn("App warn test");
-        LOG.error("App error test");
-        
-        System.out.println("just print");
-        System.err.println("just print error");
-
         TopologyMaker topologyMaker = new TopologyMaker();
         // Topology topology = topologyMaker.getMyTopology();
         Topology topology = topologyMaker.getFilebeatTopology();
@@ -51,6 +41,7 @@ public class App {
         //재실행할 때마다 로컬앱 완전초기화. 테스트시만 사용
         //kafkaStreams.cleanUp();
         
+        LOG.info("Starting Main Appication ... Target Kafka Broker: " + broker);
         kafkaStreams.start();
         Runtime.getRuntime().addShutdownHook(new Thread(kafkaStreams::close));
     }
