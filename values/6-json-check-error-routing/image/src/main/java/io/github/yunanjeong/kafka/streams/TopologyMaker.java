@@ -55,7 +55,7 @@ public class TopologyMaker { // extends Security
 
         // 메시지 포맷에 문제없을시 S3용 토픽으로, 아니면 에러토픽으로 전송 후 제거(consume)
         Map<String, KStream<String,JsonNode>> branches = inputStream.split(Named.as("msg-"))
-            .branch((key, value) -> value.get("error") == null,
+            .branch((key, value) -> value.get("deserial_error") == null,
                 Branched.withConsumer(stream -> stream.to(OUTPUT_TOPIC_S3, Produced.with(Serdes.String(), jsonNodeSerde)), "s3"))
             .defaultBranch(
                 Branched.withConsumer(stream -> { 
@@ -77,7 +77,7 @@ public class TopologyMaker { // extends Security
 
         // 원본데이터의 json Deserializa에 실패하여 error 필드가 포함된 메시지는 에러토픽으로 전송 후 제거(consume)
         Map<String, KStream<String, JsonNode>> inputBranches = inputStream.split(Named.as("input-"))
-            .branch((key, value) -> value.get("error") == null, 
+            .branch((key, value) -> value.get("deserial_error") == null, 
                 Branched.as("valid"))
             .defaultBranch(
                 Branched.withConsumer(stream -> stream.to(ERROR_TOPIC, Produced.with(Serdes.String(), jsonNodeSerde)), "invalid")

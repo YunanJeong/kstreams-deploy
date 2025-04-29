@@ -4,6 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
@@ -64,7 +68,10 @@ public class FluentbitJsonDes implements Serde<JsonNode> {
 
                 // 오류 정보를 포함한 JSON 객체로 반환
                 ObjectNode errorNode = objectMapper.createObjectNode();
-                errorNode.put("error", "Fluentbit Log Deserialization Error");
+                errorNode.put("detected_at", Instant.now()   //RFC3339 서버 시각 (절대 시간)
+                                                    .atZone(ZoneId.of("Asia/Seoul"))  // 시간대 표기법 선택(시간이 바뀌는 것은 아님)
+                                                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)); 
+                errorNode.put("deserial_error", "Fluentbit Log Deserialization Error");
                 errorNode.put("data", new String(data)); // 원본 데이터를 문자열로 포함
                 return errorNode;
             }
