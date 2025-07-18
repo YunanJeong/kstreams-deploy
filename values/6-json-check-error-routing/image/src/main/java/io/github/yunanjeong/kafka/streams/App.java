@@ -9,6 +9,7 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
 
 public class App {
 
@@ -18,6 +19,7 @@ public class App {
         String consumerGroup = System.getenv("CONSUMER_GROUP");
         String broker = System.getenv("KAFKA_BROKER");
         String autoOffsetReset = System.getenv("AUTO_OFFSET_RESET");
+        String producerCompressionType = System.getenv("PRODUCER_COMPRESSION_TYPE");
 
         Properties props = new Properties();
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, consumerGroup);
@@ -30,6 +32,9 @@ public class App {
         if (autoOffsetReset == "latest"){
             props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset); 
         }
+
+        // output 토픽 압축 // gzip, snappy, lz4, zstd
+        props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, producerCompressionType);
 
         TopologyMaker topologyMaker = new TopologyMaker();
         // Topology topology = topologyMaker.getMyTopology();

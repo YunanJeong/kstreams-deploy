@@ -26,6 +26,8 @@ streams:
         #  consumer-group이 있으면 아무리 재실행해도 consumer-group의 설정을 따름
         #  보통 consumer의 default는 latest이지만, <<KStreams에서의 default는 earliest임>>
 
+    # output 토픽에 저장할 압축방식  none, gzip, snappy, lz4, zstd 
+    PRODUCER_COMPRESSION_TYPE: "snappy"
 
     # consumer-group명, input,output 토픽명을 동적으로 수정하고 싶을시, 환경변수로 처리하자.
     # java코드와 연계된 부분은 가급적 환경변수로 처리
