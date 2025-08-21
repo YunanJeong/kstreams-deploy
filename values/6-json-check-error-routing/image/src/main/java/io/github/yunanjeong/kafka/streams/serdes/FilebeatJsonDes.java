@@ -1,5 +1,6 @@
 package io.github.yunanjeong.kafka.streams.serdes;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -15,7 +16,9 @@ import org.apache.kafka.common.serialization.Serializer;
 public class FilebeatJsonDes implements Serde<JsonNode> {
 
     // ObjectMapper는 thread-safe하므로 static final로 선언
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = 
+        new ObjectMapper()
+            .configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true); // JSON 파싱 시 큰 숫자의 정밀도 유지 (BigDecimal)
     private final JsonSerializer serializer;
     private final JsonDeserializer deserializer;
 

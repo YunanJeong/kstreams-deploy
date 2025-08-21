@@ -40,7 +40,7 @@ streams:
     
   kafka: 
     # Your Kafka Broker API
-    server: "test-kafka:9092"
+    server: "kfk-kafka:9092"
     # If true, Streams waits Kafka
     readinessCheck:
       enabled: false
