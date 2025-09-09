@@ -63,3 +63,7 @@ envsubst < mavenapp/value.yaml | helm install kstreams-mavenapp ../chartrepo/kst
 ```
 
 ## 기타
+
+- 분기처리시 단순 `branch()`는 deprecated
+- 분기처리시 `split()` 권장
+- 다중분기가 많을 경우 `filter()` 여러 번 쓰는 것이 웬만하면 재사용성이 좋음
