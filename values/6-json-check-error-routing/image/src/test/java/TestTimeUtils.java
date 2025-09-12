@@ -9,6 +9,8 @@ import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import io.github.yunanjeong.kafka.streams.TimeUtils;
+
 
 public class TestTimeUtils {
 
@@ -39,5 +41,11 @@ public class TestTimeUtils {
         return truncated.format(outputFormatter);
     }
 
+    @Test
+    @DisplayName("시간 변환 테스트 2 클래스 정적 호출")
+    void testScenario2() {
+        assertEquals(OUTPUT , TimeUtils.convert(INPUT));
+        assertTrue(!BAD_OUTPUT.equals(TimeUtils.convert(INPUT)));
+    }
 
 }
