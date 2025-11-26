@@ -1,0 +1,45 @@
+#
+# 헬름차트 kstreams-0.0.5
+#
+streams:
+  replicas: 1   # Pod늘렸을 때 Consumer Group명만 같으면 개발자가 별도 로직을 쓰지 않아도, Kafka가 자동으로 분산처리해줌
+  podAnnotations: {}
+  affinity: {}
+  tolerations: {}
+  resources: {}
+  nodeSelector: {}
+
+  # Your Streams App Image.
+  image:
+    registry: docker.wai
+    repository: "rndadmin/kstreams-schema-injection-for-db"
+    tag: 0.0.1
+
+  # 환경변수
+  # Streams앱 수정없이 helm value에서 변경할 내용들을 환경변수로 처리 (e.g. consumer group 이름, input output 토픽 등)
+  env:
+    TZ: Asia/Seoul
+  
+    AUTO_OFFSET_RESET: "earliest" # KStreams Default: earliest
+        # AUTO_OFFSET_RESET_CONFIG (auto.offset.reset)
+        #  최초실행시(consumer-group이 없을 때) 입력 토픽을 처음(earliest)부터 읽을지, 최신(latest)부터 읽을지 결정
+        #  consumer-group이 있으면 아무리 재실행해도 consumer-group의 설정을 따름
+        #  보통 consumer의 default는 latest이지만, <<KStreams에서의 default는 earliest임>>
+
+    # output 토픽에 저장할 압축방식  none, gzip, snappy, lz4, zstd 
+    PRODUCER_COMPRESSION_TYPE: "snappy"
+
+    # consumer-group명, input,output 토픽명을 동적으로 수정하고 싶을시, 환경변수로 처리하자.
+    # java코드와 연계된 부분은 가급적 환경변수로 처리
+    # 개별 helm value 항목은 생성 ㄴㄴ 적절치 않음
+    CONSUMER_GROUP: "streams-consumer-group-test"  
+    INPUT_TOPIC_REGEX: "test.topic"
+
+
+  kafka: 
+    # Your Kafka Broker API
+    server: "wsl-kafka.kafka.svc.cluster.local:9092"
+    # If true, Streams waits Kafka
+    readinessCheck:
+      enabled: true
+      # image: 

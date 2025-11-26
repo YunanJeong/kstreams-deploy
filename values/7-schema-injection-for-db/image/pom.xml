@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.github.yunanjeong.kafka.streams</groupId>
+    <artifactId>kstreams</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <!-- 빌드 단계에 쓰는 종속성들. dependency에 적어도되는데 build로 넣어주는게 일반적 -->
+    <build>
+        <plugins>
+            <!-- 최종 결과물을 단일 jar파일로 합쳐서 출력할 때 필요한 플러그인 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <!-- 사용되지 않는 클래스를 제거하여 최종 JAR 파일의 크기를 줄이는 옵션 -->
+                        <!-- Logger나 Json(특히 Jackson) 라이브러리 클래스가 의도치않게 삭제되어 비정상동작하는 경우가 있음-->
+                        <!-- 이런 경우를 일일이 예외처리하기도 힘듦 -->
+                        <!-- 드라마틱한 경량화가 되지 않는다면, 비활성화가 나음 -->
+                        <!-- 라이브 배포시 개발용 로그를 지우는 것은 이 옵션 보다는 로거 설정에서 제어 필요 -->
+                        <minimizeJar>false</minimizeJar>
+                    </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- "특정 메인 클래스를 지정"하여 "JAR 파일을 실행 가능하게" 만들 때 사용하는 플러그인 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>io.github.yunanjeong.kafka.streams.App</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-streams</artifactId>
+            <version>3.8.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-streams-test-utils</artifactId>
+            <version>3.8.0</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- SLF4J API -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.16</version>
+        </dependency>
+        <!-- Logback implementation -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.5.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.9.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.18.3</version>
+        </dependency>
+    </dependencies>
+
+</project>
