@@ -49,7 +49,7 @@ public class TopologyMaker {
             String prefix = srcTopicName.substring(0, index);  // jdbc.mum2.
             String srcLogType = srcTopicName.substring(index); // log_xxxxx
    
-            return prefix + srcLogType + "_" + yearMonth;      // jdbc.mum2.filtered_log_xxxxx_YYYY_MM
+            return prefix + "filtered_" + srcLogType + "_" + yearMonth;      // jdbc.mum2.filtered_log_xxxxx_YYYY_MM
         };
        
         validStream.to(dynamicOutputTopicName, Produced.with(Serdes.String(), jsonNodeSerde));
