@@ -12,7 +12,7 @@ streams:
   # Your Streams App Image.
   image:
     registry: docker.wai
-    repository: "rndadmin/kstreams-time-based-spliter"
+    repository: "rndadmin/kstreams-time-based-topic-spliter"
     tag: 0.0.1
 
   # 환경변수
