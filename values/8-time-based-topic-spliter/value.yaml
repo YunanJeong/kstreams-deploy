@@ -13,7 +13,7 @@ streams:
   image:
     registry: docker.wai
     repository: "rndadmin/kstreams-time-based-topic-spliter"
-    tag: 0.0.1
+    tag: 0.0.3
 
   # 환경변수
   # Streams앱 수정없이 helm value에서 변경할 내용들을 환경변수로 처리 (e.g. consumer group 이름, input output 토픽 등)
@@ -34,7 +34,7 @@ streams:
     # 개별 helm value 항목은 생성 ㄴㄴ 적절치 않음
     CONSUMER_GROUP: "streams-consumer-group-test"  
     INPUT_TOPIC_REGEX: "test.topic"
-
+    TOPIC_PREFIX: ""  # "filtered_"
 
   kafka: 
     # Your Kafka Broker API

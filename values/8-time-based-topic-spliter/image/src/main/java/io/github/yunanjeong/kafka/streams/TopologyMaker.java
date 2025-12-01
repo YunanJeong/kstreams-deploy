@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.github.yunanjeong.kafka.streams.serdes.JsonNodeSerde;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 
@@ -21,7 +22,7 @@ public class TopologyMaker {
     
     private static final Logger LOG = LoggerFactory.getLogger(TopologyMaker.class);
     private static final Pattern INPUT_TOPIC_REGEX = Pattern.compile(System.getenv("INPUT_TOPIC_REGEX"));  
-
+    private static final String TOPIC_PREFIX = Optional.ofNullable(System.getenv("TOPIC_PREFIX")).orElse("");
     private StreamsBuilder streamsBuilder = new StreamsBuilder();
     private JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();
 
@@ -44,12 +45,12 @@ public class TopologyMaker {
             long epochSeconds = value.get("time").asLong();
             String yearMonth = TimeUtils.getYearMonthFromTimestamp(epochSeconds);
 
-            String srcTopicName = recordContext.topic();       // jdbc.mum2.log_xxxxx
+            String srcTopicName = recordContext.topic();             // jdbc.mum2.log_xxxxx  //jdbc.mum.filtered_log_xxxxx
             int index = srcTopicName.indexOf("log_");
-            String prefix = srcTopicName.substring(0, index);  // jdbc.mum2.
-            String srcLogType = srcTopicName.substring(index); // log_xxxxx
+            String originPrefix = srcTopicName.substring(0, index);  // jdbc.mum2.           //jdbc.mum.filtered_
+            String srcLogType = srcTopicName.substring(index);       // log_xxxxx            //log_xxxxx
    
-            return prefix + "filtered_" + srcLogType + "_" + yearMonth;      // jdbc.mum2.filtered_log_xxxxx_YYYY_MM
+            return origniPrefix + TOPIC_PREFIX + srcLogType + "_" + yearMonth;      // jdbc.mum2.filtered_log_xxxxx_YYYY_MM  //jdbc.mum.filtered_log_xxxxx_YYYY_MM
         };
        
         validStream.to(dynamicOutputTopicName, Produced.with(Serdes.String(), jsonNodeSerde));
