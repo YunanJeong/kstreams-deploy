@@ -47,10 +47,10 @@ public class TopologyMaker {
 
             String srcTopicName = recordContext.topic();             // jdbc.mum2.log_xxxxx  //jdbc.mum.filtered_log_xxxxx
             int index = srcTopicName.indexOf("log_");
-            String originPrefix = srcTopicName.substring(0, index);  // jdbc.mum2.           //jdbc.mum.filtered_
+            String originPrefix = srcTopicName.substring(0, index);  // jdbc.mum2.           //jdbc.mum.filtered_    //log_ 앞까지 추출
             String srcLogType = srcTopicName.substring(index);       // log_xxxxx            //log_xxxxx
    
-            return origniPrefix + TOPIC_PREFIX + srcLogType + "_" + yearMonth;      // jdbc.mum2.filtered_log_xxxxx_YYYY_MM  //jdbc.mum.filtered_log_xxxxx_YYYY_MM
+            return originPrefix + TOPIC_PREFIX + srcLogType + "_" + yearMonth;      // jdbc.mum2.filtered_log_xxxxx_YYYY_MM  //jdbc.mum.filtered_log_xxxxx_YYYY_MM
         };
        
         validStream.to(dynamicOutputTopicName, Produced.with(Serdes.String(), jsonNodeSerde));
