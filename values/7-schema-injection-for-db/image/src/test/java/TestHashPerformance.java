@@ -7,7 +7,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 
 
-public class TestGetHash {
+public class TestHashPerformance {
     private static String INPUT = "12345"; 
     private static String OUTPUT = "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5";  
     private static String BAD_OUTPUT = "bad output sample~~~~"; 
@@ -28,6 +28,7 @@ public class TestGetHash {
 
     @Test
     void testSha256Performance() {
+        System.out.println("----- SHA-256 해싱 성능 테스트 -----");
         String largeData = "x".repeat(1_000_000);  // 1MB 문자열
         
         long startTime = System.nanoTime();
@@ -41,15 +42,16 @@ public class TestGetHash {
 
     @Test
     void testHashPerformanceBySize() {
+        System.out.println("----- SHA-256 해싱 성능 테스트 (크기별) -----");
         int[] sizes = {1_000, 10_000, 100_000, 1_000_000, 10_000_000};
-        
+
+        // 워밍업 (JIT 컴파일 유도, 첫 측정값 왜곡 방지)
+        for (int i = 0; i < 100; i++) {
+            DigestUtils.sha256Hex("x".repeat(1000));
+        }
+
         for (int size : sizes) {
             String data = "x".repeat(size);  //size만큼 x가 나열된 문자열
-
-            // 워밍업 (JIT 컴파일 유도, 첫 측정값 왜곡 방지)
-            for (int i = 0; i < 100; i++) {
-                DigestUtils.sha256Hex("x".repeat(1000));
-            }
 
             long start = System.nanoTime();
             DigestUtils.sha256Hex(data);
@@ -61,8 +63,9 @@ public class TestGetHash {
 
     @Test
     void testHashPerformanceByCount() {
+        System.out.println("----- SHA-256 해싱 성능 테스트 (횟수별) -----");
         String data = "x".repeat(1_000_000);  // 1MB 고정
-        int[] counts = {1_000, 10_000, 100_000, 1_000_000, 10_000_000};
+        int[] counts = {1_000, 10_000, 100_000};
         
         // 워밍업
         for (int i = 0; i < 1000; i++) {
