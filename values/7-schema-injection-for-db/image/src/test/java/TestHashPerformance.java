@@ -3,6 +3,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.codec.digest.DigestUtils;
 
 
@@ -84,6 +86,43 @@ public class TestHashPerformance {
             System.out.printf("횟수: %,d | 시간: %d ms | 처리량: %.0f ops/ms%n", 
                 count, durationMs, throughput);
         }
+    }
+
+    private static final ObjectMapper mapper = new ObjectMapper();
+    
+    @Test
+    void compareJacksonVsHash() {
+        String json = "{\"userId\":\"user123\",\"email\":\"test@example.com\",\"action\":\"login\",\"timestamp\":1234567890}";
+        int iterations = 100_000;
+        
+        // 워밍업
+        for (int i = 0; i < 1000; i++) {
+            try {
+                mapper.readTree(json);
+                DigestUtils.sha256Hex(json);
+            } catch (Exception e) {}
+        }
+        
+        // Jackson 파싱 측정
+        long jacksonStart = System.nanoTime();
+        for (int i = 0; i < iterations; i++) {
+            try {
+                mapper.readTree(json);
+            } catch (Exception e) {}
+        }
+        long jacksonTime = (System.nanoTime() - jacksonStart) / 1_000_000;
+        
+        // SHA-256 해싱 측정
+        long hashStart = System.nanoTime();
+        for (int i = 0; i < iterations; i++) {
+            DigestUtils.sha256Hex(json);
+        }
+        long hashTime = (System.nanoTime() - hashStart) / 1_000_000;
+        
+        System.out.printf("Jackson 파싱 %,d회: %d ms%n", iterations, jacksonTime);
+        System.out.printf("SHA-256 해싱 %,d회: %d ms%n", iterations, hashTime);
+        System.out.printf("비율: Jackson이 SHA-256보다 %.1fx 느림%n", 
+            (double) jacksonTime / hashTime);
     }
 
 }
