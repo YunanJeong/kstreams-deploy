@@ -85,7 +85,7 @@ public class TopologyMaker { // extends Security
                 finalNode.set("payload", payloadNode);
                 
                 String topicName = jsonNode.get("log_type").asText().toLowerCase(); // 출력 테이블명(토픽명) 동적 처리 용도
-                String randomKey = jsonNode.get("uuid").asText(); // 고유값 할당하여 토픽 파티션마다 고른 분배 보장  // UUID.randomUUID().toString(); 
+                String randomKey = jsonNode.get("uuid").asText(); // 고유값 할당하여 토픽 파티션마다 고른 분배 보장  // UUID.randomUUID().toString();  // DigestUtils.sha256Hex(input);
 
                 String resultKey = topicName + "#" + randomKey;
                 JsonNode resultValue = finalNode;
