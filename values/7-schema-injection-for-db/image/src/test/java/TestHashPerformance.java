@@ -30,7 +30,7 @@ public class TestHashPerformance {
 
     @Test
     void testSha256Performance() {
-        System.out.println("----- SHA-256 해싱 성능 테스트 -----");
+        System.out.println("----- SHA-256 해싱 성능 테스트 1회 -----");
         String largeData = "x".repeat(1_000_000);  // 1MB 문자열
         
         long startTime = System.nanoTime();
@@ -65,7 +65,7 @@ public class TestHashPerformance {
 
     @Test
     void testHashPerformanceByCount() {
-        System.out.println("----- SHA-256 해싱 성능 테스트 (횟수별) -----");
+        System.out.println("----- SHA-256 해싱 성능 테스트 (횟수 별, 로그1개=1MB) -----");
         String data = "x".repeat(1_000_000);  // 1MB 고정
         int[] counts = {1_000, 10_000, 100_000};
         
@@ -92,6 +92,7 @@ public class TestHashPerformance {
     
     @Test
     void compareJacksonVsHash() {
+        System.out.println("----- Json처리에 비해 Hash처리는 부하를 얼마나 먹을까-----");
         String json = "{\"userId\":\"user123\",\"email\":\"test@example.com\",\"action\":\"login\",\"timestamp\":1234567890}";
         int iterations = 100_000;
         
