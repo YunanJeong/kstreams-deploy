@@ -21,7 +21,7 @@ import org.apache.kafka.streams.StreamsConfig;
 // JDK 16+부터는 이 제한이 강화돼 코드 내 지정 방식인 @SetEnvironmentVariable 사용 불가
 // 테스트용 환경변수는 보통 JVM 실행 시점(IDE, 빌드도구)에서 설정하는 것이 정석
 // 대안으로 (uk) system-stubs 라이브러리 사용가능
-// system-stubs는 Java의 유일한 환경변수 접근 API인 System.getenv() 호출 결과를 "테스트 범위(JUnit동작)에서만" 가짜로 반환함
+// system-stubs는 Java의 유일한 환경변수 접근 API인 System.getenv() 호출 결과를 "테스트 범위(JUnit동작)에서만" 가짜로 반환하게 함
 
 @ExtendWith(SystemStubsExtension.class)
 public class TestKafkaClientPropertiesLoader {
