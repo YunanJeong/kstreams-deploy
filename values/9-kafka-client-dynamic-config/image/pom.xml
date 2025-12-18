@@ -97,6 +97,13 @@
             <artifactId>commons-codec</artifactId>
             <version>1.16.0</version>
         </dependency>
+        <!-- 유닛테스트시 환경변수 설정을 위해 필요 -->
+        <dependency>
+            <groupId>uk.org.webcompere</groupId>
+            <artifactId>system-stubs-jupiter</artifactId>
+            <version>2.1.7</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>
