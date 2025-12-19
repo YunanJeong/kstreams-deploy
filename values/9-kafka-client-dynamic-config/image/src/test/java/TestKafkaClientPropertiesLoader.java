@@ -1,8 +1,17 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -16,6 +25,11 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.streams.StreamsConfig;
 
 
+import org.apache.kafka.clients.CommonClientConfigs;
+import org.apache.kafka.common.config.SaslConfigs;
+import org.apache.kafka.common.config.SecurityConfig;
+import org.apache.kafka.common.config.SslConfigs;
+import org.apache.kafka.common.config.TopicConfig;
 
 /* 테스트 코드에서만 환경변수 지정하기 */
 // 환경변수는 JVM이 시작될 때 한 번 정해지고, 실행 중 변경은 원칙적으로 불가(즉, 코드 내 지정 불가)
@@ -71,10 +85,51 @@ public class TestKafkaClientPropertiesLoader {
         assertEquals("10485760", props.getProperty(StreamsConfig.producerPrefix(ProducerConfig.MAX_REQUEST_SIZE_CONFIG))); // "producer.max.request.size"
         assertEquals("empty_name_test", props.getProperty(""));
 
-        System.out.println(ProducerConfig.configNames());
     }
-    
-    
+
+    @Test
+    public void print(){
+
+        // System.out.println(getConstantValueSet(CommonClientConfigs.class));
+        // System.out.println(getConstantValueSet(TopicConfig.class));
+        // System.out.println(getConstantValueSet(SaslConfigs.class));
+        // System.out.println(getConstantValueSet(SecurityConfig.class));
+        // System.out.println(getConstantValueSet(SslConfigs.class));
+        // getConstantValueSet(CommonClientConfigs.class).forEach(System.out::println); //ㅇㅋ
+        // getConstantValueSet(TopicConfig.class).forEach(System.out::println); //ㅇㅋ
+        // filterContaining(getConstantValueSet(SaslConfigs.class),"sasl.").forEach(System.out::println); //ㅇㅋ
+        // getConstantValueSet(SslConfigs.class).forEach(System.out::println);
+        // getConstantValueSet(SecurityConfig.class).forEach(System.out::println);
+    }
+
+    public static Set<String> getConfigNames(Class<?> configClass) {
+        // configNames() 메서드가 없는 클래스들을 위한 리플렉션 기반 대안
+        // 클래스 변수를 조회하여 상수값들을 추출한다.
+        Set<String> result = new LinkedHashSet<>();  
+
+        Arrays.stream(configClass.getFields())
+            .filter(field -> Modifier.isStatic(field.getModifiers())) // static 필드만 추출 (상수)
+            .filter(field -> field.getType() == String.class)   // String 타입만 추출
+            .filter(field -> !field.getName().startsWith("DEFAULT_")) // DEFAULT_로 시작하는 필드 제외
+            .filter(field -> !field.getName().endsWith("_DOC")) // _DOC로 끝나는 필드 제외
+            .filter(field -> !field.getName().endsWith("_NOTE")) // _NOTE로 끝나는 필드 제외
+            .forEach(field -> {
+                try {
+                    String keyValue = (String) field.get(null); // static이라 null
+                    // System.out.println(keyValue);
+                    result.add(keyValue);
+                } catch (IllegalAccessException exception) {
+                    throw new RuntimeException(exception);
+                }
+            });
+        return result;
+    }
+    public static Set<String> filterContaining(Set<String> values, String token) {
+        // Set에서 특정단어 포함한 것만 남기기
+        return values.stream()
+            .filter(value -> value != null && value.contains(token))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
 
 }
 
