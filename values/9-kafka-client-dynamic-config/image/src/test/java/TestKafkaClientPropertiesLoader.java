@@ -102,34 +102,7 @@ public class TestKafkaClientPropertiesLoader {
         // getConstantValueSet(SecurityConfig.class).forEach(System.out::println);
     }
 
-    public static Set<String> getConfigNames(Class<?> configClass) {
-        // configNames() 메서드가 없는 클래스들을 위한 리플렉션 기반 대안
-        // 클래스 변수를 조회하여 상수값들을 추출한다.
-        Set<String> result = new LinkedHashSet<>();  
 
-        Arrays.stream(configClass.getFields())
-            .filter(field -> Modifier.isStatic(field.getModifiers())) // static 필드만 추출 (상수)
-            .filter(field -> field.getType() == String.class)   // String 타입만 추출
-            .filter(field -> !field.getName().startsWith("DEFAULT_")) // DEFAULT_로 시작하는 필드 제외
-            .filter(field -> !field.getName().endsWith("_DOC")) // _DOC로 끝나는 필드 제외
-            .filter(field -> !field.getName().endsWith("_NOTE")) // _NOTE로 끝나는 필드 제외
-            .forEach(field -> {
-                try {
-                    String keyValue = (String) field.get(null); // static이라 null
-                    // System.out.println(keyValue);
-                    result.add(keyValue);
-                } catch (IllegalAccessException exception) {
-                    throw new RuntimeException(exception);
-                }
-            });
-        return result;
-    }
-    public static Set<String> filterContaining(Set<String> values, String token) {
-        // Set에서 특정단어 포함한 것만 남기기
-        return values.stream()
-            .filter(value -> value != null && value.contains(token))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
 
 }
 
