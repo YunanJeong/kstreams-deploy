@@ -35,7 +35,10 @@ public class TestConfig {
         String key2 = "consumer.auto.offset.reset";
         String key3 = StreamsConfig.consumerPrefix("auto.offset.reset");
         String key4 = StreamsConfig.consumerPrefix(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG);
+        String key5 = StreamsConfig.CONSUMER_PREFIX + ConsumerConfig.AUTO_OFFSET_RESET_CONFIG;
         assertEquals(key2, key3, key4);
+        assertEquals(key2, key5);
+        
         
         System.out.println("\n=== 모두 단순 String일 뿐. Java 코드화(인텔리센스, 디버그, 오타방지 등)를 위해 메서드/상수로 제공됨 ===");
         System.out.println("방식 0: " + key0);
@@ -43,6 +46,7 @@ public class TestConfig {
         System.out.println("방식 2: " + key2);
         System.out.println("방식 3: " + key3);
         System.out.println("방식 4: " + key4);
+        System.out.println("방식 5: " + key5);
     }
     
     
