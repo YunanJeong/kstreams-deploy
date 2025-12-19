@@ -71,7 +71,7 @@ public class TopologyMaker { // extends Security
         );
 
 
-        outputStream.to("output.topic", Produced.with(Serdes.String(), jsonNodeSerde));
+        // outputStream.to("output.topic", Produced.with(Serdes.String(), jsonNodeSerde));
    
         return streamsBuilder.build();
     }

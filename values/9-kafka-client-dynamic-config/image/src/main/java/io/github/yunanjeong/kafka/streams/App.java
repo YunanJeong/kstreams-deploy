@@ -22,19 +22,11 @@ public class App {
         String producerCompressionType = System.getenv("PRODUCER_COMPRESSION_TYPE");
 
         Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, consumerGroup);
-        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, broker);
-        
-        // # AUTO_OFFSET_RESET_CONFIG (auto.offset.reset)
-        // #  최초실행시(consumer-group이 없을 때) 입력 토픽을 처음(earliest)부터 읽을지, 최신(latest)부터 읽을지 결정
-        // #  consumer-group이 있으면 아무리 재실행해도 consumer-group의 설정을 따름
-        // #  보통 consumer의 default는 latest이지만, "KStreams에서의 default는 earliest임"
-        if (autoOffsetReset == "latest"){
-            props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset); 
-        }
+        KafkaClientPropertiesLoader kcpl = new KafkaClientPropertiesLoader();
 
-        // output 토픽 압축 // gzip, snappy, lz4, zstd
-        props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, producerCompressionType);
+        // props.put(StreamsConfig.APPLICATION_ID_CONFIG, consumerGroup);
+        // props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, broker);
+        // props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, producerCompressionType);
 
         TopologyMaker topologyMaker = new TopologyMaker();
         Topology topology = topologyMaker.getMyTopology();
