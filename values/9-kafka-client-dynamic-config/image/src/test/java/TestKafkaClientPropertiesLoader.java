@@ -29,7 +29,8 @@ public class TestKafkaClientPropertiesLoader {
     @SystemStub
     private EnvironmentVariables env = 
         new EnvironmentVariables(
-            "FOO", "bar",
+            "foo", "bar",
+            "STREAMS_STREAMS_STREAMS_ddddd", "bar",
             "STREAMS_BOOTSTRAP_SERVERS", "k1:9092,k2:9092",
             "STREAMS_APPLICATION_ID", "my-app",
             "STREAMS_AUTO_OFFSET_RESET", "earliest",
@@ -43,10 +44,10 @@ public class TestKafkaClientPropertiesLoader {
         
         System.out.println(props);
 
-        assertEquals("k1:9092,k2:9092", props.getProperty(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG));
-        assertEquals("my-app", props.getProperty(StreamsConfig.APPLICATION_ID_CONFIG));
-        assertEquals("earliest", props.getProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG));
-        assertEquals("latest", props.getProperty(StreamsConfig.consumerPrefix(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG)));
+        assertEquals("k1:9092,k2:9092", props.getProperty(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG)); // "bootstrap.servers"
+        assertEquals("my-app", props.getProperty(StreamsConfig.APPLICATION_ID_CONFIG)); // "application.id"
+        assertEquals("earliest", props.getProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG)); // "auto.offset.reset"
+        assertEquals("latest", props.getProperty(StreamsConfig.consumerPrefix(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG))); // "consumer.auto.offset.reset"
 
 
     }
