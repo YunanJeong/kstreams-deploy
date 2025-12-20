@@ -4,6 +4,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,8 +31,14 @@ public class KafkaClientPropertiesLoader {
     //     this.AVAILABLE_KEYS = 
     // }
 
-    public Properties loadFromEnv()  {
+    public Properties load()  {
         return loadFromEnvPrefix(System.getenv(), "STREAMS_");
+    }
+
+    public Properties loadAndValidate()  {
+        Properties props = loadFromEnvPrefix(System.getenv(), "STREAMS_");
+        validateConfigNamesOrThrow(AVAILABLE_CONFIG_KEY_NAMES, props.stringPropertyNames());
+        return props;
     }
 
     public Properties loadFromEnvPrefix(Map<String, String> envs, String prefix)  {
@@ -52,9 +59,6 @@ public class KafkaClientPropertiesLoader {
                 props.put(propertyName, envValue);
             }
         });
-        
-        // 유효한 설정 키인지 검사
-        validateConfigNamesOrThrow(AVAILABLE_CONFIG_KEY_NAMES, props.stringPropertyNames());
 
         return props;
     }
@@ -73,7 +77,7 @@ public class KafkaClientPropertiesLoader {
             if (name.startsWith("client.tag.")) continue; // 뒤에 무작위 key-value 쌍이 올 수 있음
             if (name.startsWith("metrics.context.")) continue; // 뒤에 무작위 key-value 쌍이 올 수 있음
             if (name.startsWith("topic.")) continue; // topic prefix는 전체허용. 이는 카프카 브로커 버전에 따라 다를 수 있기 때문
-
+            
             if (!availKeys.contains(name)) {
                 invalidNames.add(name);
             }
@@ -90,59 +94,44 @@ public class KafkaClientPropertiesLoader {
     private Set<String> buildAvailableConfigNames() {
         // 주요 설정키 집합을 생성한다. 유효성 검사용
         // 버전에 따라 일부 키가 다를 수 있으므로, 실행 시점에 동적으로 추출
-        // StreamsConfig.InternalConfig 제외
-        // client.tag 제외
-        // TopicConfig 주의
-        // metrics.context.<key>=<value>
+        // StreamsConfig.InternalConfig 미포함 // 자주 사용하지않음
+        // client.tag. 접두어 미포함  // 단순 태그 붙이는 용도
+        // topic. 접두어 미포함  // 브로커 사양에 따르므로 topic. prefix는 전체허용
+        // metrics.context.<key>=<value> 미포함 // 단순 메트릭 태그 붙이는 용도 
 
-        Set<String> names = new HashSet<>();
+        Set<String> result = new HashSet<>();
 
+        List<Set<String>> namesList = new ArrayList<>();
         // 주요 Kafka Client 설정 키들
-        Set<String> streamsNames   = StreamsConfig.configDef().names();
-        Set<String> consumerNames  = ConsumerConfig.configNames();
-        Set<String> producerNames  = ProducerConfig.configNames();
-        Set<String> adminNames     = AdminClientConfig.configNames();
+        namesList.add(StreamsConfig.configDef().names());
+        namesList.add(ConsumerConfig.configNames());
+        namesList.add(ProducerConfig.configNames());
+        namesList.add(AdminClientConfig.configNames());
 
         // 추가로 configNames() 메서드가 없는 클래스들에서 키 이름 추출
-        Set<String> commonNames    = getConfigNames(CommonClientConfigs.class);
-        Set<String> topicNames     = getConfigNames(TopicConfig.class);
-        Set<String> sslNames       = getConfigNames(SslConfigs.class);
-        Set<String> saslNames      = filterContaining(getConfigNames(SaslConfigs.class), "sasl.");
-        Set<String> securityNames  = getConfigNames(SecurityConfig.class);
-
-        // 모든 키 집합 통합
-        names.addAll(streamsNames);
-        names.addAll(consumerNames);
-        names.addAll(producerNames);
-        names.addAll(adminNames);
-        names.addAll(commonNames);
-        names.addAll(topicNames);
-        names.addAll(sslNames);
-        names.addAll(saslNames);
-        names.addAll(securityNames);
-
+        namesList.add(getConfigNames(CommonClientConfigs.class));
+        namesList.add(getConfigNames(TopicConfig.class));
+        namesList.add(getConfigNames(SslConfigs.class));
+        namesList.add(filterContaining(getConfigNames(SaslConfigs.class), "sasl."));
+        namesList.add(getConfigNames(SecurityConfig.class));
+        
         // 접두사 붙인 키들도 추가
-        names.addAll(withPrefix(StreamsConfig.CONSUMER_PREFIX, consumerNames));
-        names.addAll(withPrefix(StreamsConfig.MAIN_CONSUMER_PREFIX, consumerNames));
-        names.addAll(withPrefix(StreamsConfig.RESTORE_CONSUMER_PREFIX, consumerNames));
-        names.addAll(withPrefix(StreamsConfig.GLOBAL_CONSUMER_PREFIX, consumerNames));
-        names.addAll(withPrefix(StreamsConfig.PRODUCER_PREFIX, producerNames));
-        names.addAll(withPrefix(StreamsConfig.ADMIN_CLIENT_PREFIX, adminNames));
-        // names.addAll(getKeysWithPrefix(StreamsConfig.TOPIC_PREFIX, topicNames)); //topic prefix는 전체허용. 이는 카프카 브로커 사양에 따르기 때문
-        // client.tag 접두사는 전체 허용 (단순 태그 붙이는 용도)
-        // StreamsConfig.InternalConfig 도 예외 // 자주 사용하지않음
+        namesList.add( withPrefix(StreamsConfig.CONSUMER_PREFIX,         ConsumerConfig.configNames())    );
+        namesList.add( withPrefix(StreamsConfig.MAIN_CONSUMER_PREFIX,    ConsumerConfig.configNames())    );
+        namesList.add( withPrefix(StreamsConfig.RESTORE_CONSUMER_PREFIX, ConsumerConfig.configNames())    );
+        namesList.add( withPrefix(StreamsConfig.GLOBAL_CONSUMER_PREFIX,  ConsumerConfig.configNames())    );
+        namesList.add( withPrefix(StreamsConfig.PRODUCER_PREFIX,         ProducerConfig.configNames())    );
+        namesList.add( withPrefix(StreamsConfig.ADMIN_CLIENT_PREFIX,     AdminClientConfig.configNames()) );
 
-        return names;
-    }
-
-    public Set<String> withPrefix(String prefix, Set<String> configNames) {
-        // prefix 붙인 키 집합 반환
-        Set<String> result = new HashSet<>();
-        for (String configName : configNames) {
-            result.add(prefix + configName);
+        // 모든 설정이름 집합 통합
+        for (Set<String> names : namesList) {
+            result.addAll(names);
         }
+
         return result;
     }
+
+
     private Set<String> getConfigNames(Class<?> configClass) {
         // configNames() 메서드가 없는 클래스들을 위한 리플렉션 기반 대안
         // 클래스 변수를 조회하여 상수값들을 추출한다.
@@ -165,8 +154,16 @@ public class KafkaClientPropertiesLoader {
             });
         return result;
     }
+    private Set<String> withPrefix(String prefix, Set<String> names) {
+        // 집합 각 요소에 prefix 붙여서 반환
+        Set<String> result = new HashSet<>();
+        for (String name : names) {
+            result.add(prefix + name);
+        }
+        return result;
+    }
     private Set<String> filterContaining(Set<String> values, String token) {
-        // Set에서 특정단어 포함한 것만 남기기
+        // Set에서 특정단어 포함한 것만 남겨서 반환
         return values.stream()
             .filter(value -> value != null && value.contains(token))
             .collect(Collectors.toCollection(LinkedHashSet::new));
