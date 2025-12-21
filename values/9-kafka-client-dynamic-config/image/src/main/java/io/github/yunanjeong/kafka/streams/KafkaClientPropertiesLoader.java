@@ -3,8 +3,8 @@ package io.github.yunanjeong.kafka.streams;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,19 +25,19 @@ import org.apache.kafka.streams.StreamsConfig;
 
 public class KafkaClientPropertiesLoader {
     
-    private Set<String> AVAILABLE_CONFIG_KEY_NAMES = buildAvailableConfigNames();;
-
-    // public KafkaClientPropertiesLoader() {
-    //     this.AVAILABLE_KEYS = 
-    // }
+    private static final Set<String> AVAILABLE_CONFIG_NAMES = Collections.unmodifiableSet(buildAvailableConfigNames());
 
     public Properties load()  {
         return loadFromEnvPrefix(System.getenv(), "STREAMS_");
     }
 
     public Properties loadAndValidate()  {
-        Properties props = loadFromEnvPrefix(System.getenv(), "STREAMS_");
-        validateConfigNamesOrThrow(AVAILABLE_CONFIG_KEY_NAMES, props.stringPropertyNames());
+        return loadFromEnvPrefixAndValidate(System.getenv(), "STREAMS_");
+    }
+
+    public Properties loadFromEnvPrefixAndValidate(Map<String, String> envs, String prefix)  {
+        Properties props = loadFromEnvPrefix(envs, prefix);
+        validateConfigNamesOrThrow(AVAILABLE_CONFIG_NAMES, props.stringPropertyNames());
         return props;
     }
 
@@ -63,9 +63,7 @@ public class KafkaClientPropertiesLoader {
         return props;
     }
 
-
-
-    private void validateConfigNamesOrThrow(Set<String> availKeys, Set<String> names) {
+    private void validateConfigNamesOrThrow(Set<String> availNames, Set<String> names) {
         /**
          * 유효한 Kafka 클라이언트 설정 키인지 검사.
          * 특히 성능 옵션 설정에서 오타 발생시 무시되고 기본값이 사용될 수 있는데, 당장 알아차리기 힘드므로 Exception 발생시킴.
@@ -74,11 +72,11 @@ public class KafkaClientPropertiesLoader {
         List<String> invalidNames = new ArrayList<>();
 
         for (String name : names) {
-            if (name.startsWith("client.tag.")) continue; // 뒤에 무작위 key-value 쌍이 올 수 있음
-            if (name.startsWith("metrics.context.")) continue; // 뒤에 무작위 key-value 쌍이 올 수 있음
-            if (name.startsWith("topic.")) continue; // topic prefix는 전체허용. 이는 카프카 브로커 버전에 따라 다를 수 있기 때문
-            
-            if (!availKeys.contains(name)) {
+            if (name.startsWith(StreamsConfig.CLIENT_TAG_PREFIX)) continue; // client.tag.* 전체허용. 무작위 key-value 쌍이 올 수 있음
+            if (name.startsWith("metrics.context.")) continue; // metrics.context.* 전체허용. 뒤에 무작위 key-value 쌍이 올 수 있음
+            if (name.startsWith(StreamsConfig.TOPIC_PREFIX)) continue; // topic.* 전체허용. 이는 카프카 브로커 버전에 따라 다를 수 있기 때문
+
+            if (!availNames.contains(name)) {
                 invalidNames.add(name);
             }
         }
@@ -91,15 +89,20 @@ public class KafkaClientPropertiesLoader {
     }
 
 
-    private Set<String> buildAvailableConfigNames() {
-        // 주요 설정키 집합을 생성한다. 유효성 검사용
-        // 버전에 따라 일부 키가 다를 수 있으므로, 실행 시점에 동적으로 추출
-        // StreamsConfig.InternalConfig 미포함 // 자주 사용하지않음
-        // client.tag. 접두어 미포함  // 단순 태그 붙이는 용도
-        // topic. 접두어 미포함  // 브로커 사양에 따르므로 topic. prefix는 전체허용
-        // metrics.context.<key>=<value> 미포함 // 단순 메트릭 태그 붙이는 용도 
-
-        Set<String> result = new HashSet<>();
+    private static Set<String> buildAvailableConfigNames() {
+        /* 
+         * 사용가능한 주요 설정키 집합을 생성한다.
+         * 오타 및 유효성 검증용이므로 문자열 하드코딩을 피하고 API로 추출한다.
+         * 버전에 따라 일부 키가 다를 수 있음
+         * 
+         * 이 함수 결과(Set)에 포함하지 않음:
+         * - StreamsConfig.InternalConfig 관련설정 (거의 안 씀)
+         *
+         * 이 함수 결과(Set)에 포함하지 않으며, 검증 로직에서 prefix로 전체 허용:
+         * - client.tag.<key>=<value>
+         * - topic.<key>=<value>
+         * - metrics.context.<key>=<value>
+         */
 
         List<Set<String>> namesList = new ArrayList<>();
         // 주요 Kafka Client 설정 키들
@@ -123,7 +126,8 @@ public class KafkaClientPropertiesLoader {
         namesList.add( withPrefix(StreamsConfig.PRODUCER_PREFIX,         ProducerConfig.configNames())    );
         namesList.add( withPrefix(StreamsConfig.ADMIN_CLIENT_PREFIX,     AdminClientConfig.configNames()) );
 
-        // 모든 설정이름 집합 통합
+        // 모든 설정이름 합치고 중복 제거
+        Set<String> result = new HashSet<>();
         for (Set<String> names : namesList) {
             result.addAll(names);
         }
@@ -131,8 +135,7 @@ public class KafkaClientPropertiesLoader {
         return result;
     }
 
-
-    private Set<String> getConfigNames(Class<?> configClass) {
+    private static Set<String> getConfigNames(Class<?> configClass) {
         // configNames() 메서드가 없는 클래스들을 위한 리플렉션 기반 대안
         // 클래스 변수를 조회하여 상수값들을 추출한다.
         Set<String> result = new LinkedHashSet<>();  
@@ -154,16 +157,16 @@ public class KafkaClientPropertiesLoader {
             });
         return result;
     }
-    private Set<String> withPrefix(String prefix, Set<String> names) {
-        // 집합 각 요소에 prefix 붙여서 반환
+    private static Set<String> withPrefix(String prefix, Set<String> names) {
+        // Set 각 요소에 prefix 붙여서 반환
         Set<String> result = new HashSet<>();
         for (String name : names) {
             result.add(prefix + name);
         }
         return result;
     }
-    private Set<String> filterContaining(Set<String> values, String token) {
-        // Set에서 특정단어 포함한 것만 남겨서 반환
+    private static Set<String> filterContaining(Set<String> values, String token) {
+        // Set에서 특정단어 포함한 것만 남긴 후 반환
         return values.stream()
             .filter(value -> value != null && value.contains(token))
             .collect(Collectors.toCollection(LinkedHashSet::new));
