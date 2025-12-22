@@ -1,4 +1,6 @@
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
@@ -14,6 +16,8 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import com.fasterxml.jackson.databind.annotation.JsonAppend.Prop;
 
 import io.github.yunanjeong.kafka.streams.KafkaClientPropertiesLoader;
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
@@ -47,18 +51,19 @@ public class TestKafkaClientPropertiesLoader {
         new EnvironmentVariables(
             "NON_TARGET_ENV_KEY", "non_target_env_value",
 
-            // 코드 복잡해지게 굳이 예외처리 할 필요없는 케이스. 운영시 잘못 넣어도 상위 레이어에서 에러뜨거나 무시할거니까.
-            "STREAMS_", "empty_name_test",
-            "STREAMS_STREAMS_STREAMS_ddddd", "prefix parsing test",
-
             // 굳이 필수 처리 안해도됨. 운영에서 관리할 영역이고, 값이 없더라도 상위 레이어에서 즉시 에러 발생시켜주거나 기본값 처리될거니까. 
             "STREAMS_BOOTSTRAP_SERVERS", "k1:9092,k2:9092",
             "STREAMS_APPLICATION_ID", "my-app",
 
             // 기타 설정 General Case
+            // 오타 입력시 예외처리가 있으면 좋음. 운영시 잘못 넣으면 그냥 무시되고 기본값이 사용되므로 확인이 힘듦
             "STREAMS_AUTO_OFFSET_RESET", "earliest",
             "STREAMS_CONSUMER_AUTO_OFFSET_RESET", "latest",
-            "STREAMS_PRODUCER_MAX_REQUEST_SIZE", "10485760"
+            "STREAMS_PRODUCER_MAX_REQUEST_SIZE", "10485760",
+
+            // 코드 복잡해지게 굳이 예외처리 할 필요없는 케이스이긴 함. 운영시 잘못 넣어도 상위 레이어에서 무시할거니까.
+            "STREAMS_", "empty_name_test",
+            "STREAMS_STREAMS_STREAMS_ddddd", "prefix parsing test"
         );
 
     @Test
@@ -88,20 +93,45 @@ public class TestKafkaClientPropertiesLoader {
     }
 
     @Test
-    public void print(){
+    public void TestLoadAndValidate(){
+        // Properties props = new KafkaClientPropertiesLoader().loadAndValidate();
+        //Properties props = new KafkaClientPropertiesLoader().loadFromEnvPrefixAndValidate(System.getenv(), "STREAMS_");
 
-        // System.out.println(getConstantValueSet(CommonClientConfigs.class));
-        // System.out.println(getConstantValueSet(TopicConfig.class));
-        // System.out.println(getConstantValueSet(SaslConfigs.class));
-        // System.out.println(getConstantValueSet(SecurityConfig.class));
-        // System.out.println(getConstantValueSet(SslConfigs.class));
-        // getConstantValueSet(CommonClientConfigs.class).forEach(System.out::println); //ㅇㅋ
-        // getConstantValueSet(TopicConfig.class).forEach(System.out::println); //ㅇㅋ
-        // filterContaining(getConstantValueSet(SaslConfigs.class),"sasl.").forEach(System.out::println); //ㅇㅋ
-        // getConstantValueSet(SslConfigs.class).forEach(System.out::println);
-        // getConstantValueSet(SecurityConfig.class).forEach(System.out::println);
+        assertDoesNotThrow(() -> {
+            Map <String, String> allEnvs = Map.of(
+                "STREAMS_BOOTSTRAP_SERVERS", "k1:9092,k2:9092",
+                "STREAMS_APPLICATION_ID", "my-app",
+                "STREAMS_AUTO_OFFSET_RESET", "earliest",
+                "STREAMS_CONSUMER_AUTO_OFFSET_RESET", "latest",
+                "STREAMS_PRODUCER_MAX_REQUEST_SIZE", "10485760"
+            );
+
+            Properties props = new KafkaClientPropertiesLoader().loadFromEnvPrefixAndValidate(allEnvs, "STREAMS_");
+            System.out.println("// 정상 케이스에서는 예외 안나는지 확인 및 출력");
+            props.forEach((k, v) -> 
+                System.out.println(k + " = " + v)
+            );
+        });
+
+        Exception ex = assertThrows(Exception.class, () -> {
+            // invalid key가 있을 때 예외 발생하는지 확인 (Throw 발생시 성공)
+            Map<String, String> allEnvs = Map.of(
+                "STREAMS_BOOTSTRAP_SERVERS", "k1:9092,k2:9092",
+
+                // 설정키가 아닌 것들
+                "STREAMS_INVALID_CONFIG_NAME", "some_value",
+                "STREAMS_PRODUCER_MAX_REQUESTssss_SIZE", "10485760",
+
+                // 설정키가 아닌 것들2
+                "STREAMS_", "empty_name_test",
+                "STREAMS_STREAMS_STREAMS_ddddd", "prefix parsing test"
+            );
+
+            Properties props = new KafkaClientPropertiesLoader().loadFromEnvPrefixAndValidate(allEnvs, "STREAMS_");
+        });
+        System.out.println("// throw 발생시 메시지 정상 출력 확인");
+        ex.getMessage().lines().forEach(line -> System.out.println("Exception message line: " + line));
     }
-
 
 
 }
