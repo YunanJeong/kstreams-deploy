@@ -33,22 +33,6 @@ public class TopologyMaker { // extends Security
     // private static final String INPUT_TOPIC = System.getenv("INPUT_TOPIC"); 
     private static final Pattern INPUT_TOPIC_REGEX = Pattern.compile(System.getenv("INPUT_TOPIC_REGEX"));  
 
-    private static final String SCHEMA_STRING = """ 
-        {
-            "type": "struct",
-            "fields": [
-                {"field": "server_no", "type": "int32"},
-                {"field": "date_time", "type": "string"},
-                {"field": "uuid", "type": "string"},
-                {"field": "content", "type": "string"}
-            ]
-        }
-        """;
-    private static final List<String> CURRENCY_LOG_TYPES = 
-        List.of("currency_a", "currency_b", "currency_c", "currency_d");
-    private static final List<String> BUY_LOG_TYPES = 
-        List.of("exchange_buy", "layby_buy");
-
     private StreamsBuilder streamsBuilder = new StreamsBuilder();
     private JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();
     private FilebeatJsonDes filebeatJsonDes = new FilebeatJsonDes();
@@ -70,12 +54,12 @@ public class TopologyMaker { // extends Security
             (key, value) -> isBiz(value) 
         );
 
-
-        // outputStream.to("output.topic", Produced.with(Serdes.String(), jsonNodeSerde));
+        bizStream.to("output.topic", Produced.with(Serdes.String(), jsonNodeSerde));
    
         return streamsBuilder.build();
     }
 
+    // 비즈니스 데이터 처리 로직
     private boolean isBiz(JsonNode value){
         if (value == null) return false;
         return true;
