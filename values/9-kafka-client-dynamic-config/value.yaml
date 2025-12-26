@@ -49,9 +49,9 @@ kafkaClientOverrides: # {}
   producer.compression.type: gzip      
 
   # 단일 메시지 크기 10MB까지 처리하기 위한 설정
-  consumer.fetch.max.bytes: "10485760"     
-  consumer.max.partition.fetch.bytes: "10485760"
-  producer.max.request.size: "10485760"
+  # consumer.fetch.max.bytes: "10485760"     
+  # consumer.max.partition.fetch.bytes: "10485760"
+  # producer.max.request.size: "10485760"
 
   # consumer.auto.offset.reset: "earliest"  # earliest(default), latest
   # auto.offset.reset: "earliest"           # used if consumer.auto.offset.reset not set

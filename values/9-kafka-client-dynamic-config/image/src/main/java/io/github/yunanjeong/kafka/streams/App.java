@@ -21,12 +21,12 @@ public class App {
         Properties props = new KafkaClientPropertiesLoader().loadAndValidate();
         KafkaStreams kafkaStreams = new KafkaStreams(topology, props);
 
-        LOG.info("Starting Main Appication ... Target Kafka Broker: " + props.get(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG));
-        LOG.info("Application ID: " + props.get(StreamsConfig.APPLICATION_ID_CONFIG));
-        LOG.info("KafkaClientProperties Overrides: ");
         props.stringPropertyNames().stream()
             .sorted()
-            .forEach(key -> LOG.info("{}={}", key, props.getProperty(key)));
+            .forEach(key -> LOG.info("KafkaClientProperties Overrides: {}={}", key, props.getProperty(key)));
+
+        LOG.info("Starting Main Appication ... Target Kafka Broker: " + props.get(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG));
+        LOG.info("Application ID: " + props.get(StreamsConfig.APPLICATION_ID_CONFIG));
 
         kafkaStreams.start();
         Runtime.getRuntime().addShutdownHook(new Thread(kafkaStreams::close));
