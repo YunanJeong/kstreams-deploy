@@ -41,7 +41,7 @@ public class TopologyMaker { // extends Security
         LOG.info("Getting topology ...");
         KStream<String, JsonNode> inputStream = streamsBuilder.stream(
             INPUT_TOPIC_REGEX,
-            Consumed.with(Serdes.String(), filebeatJsonDes)
+            Consumed.with(Serdes.String(), jsonNodeSerde)
         );
         
         // Json 검증
