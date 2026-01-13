@@ -54,8 +54,8 @@ public class TestTimeUtils {
     @Test
     @DisplayName("시간 변환 테스트 3 소수점 이하 몇자리든 6자리로 변환")
     void testScenario3() {
-        System.out.println(TimeUtils.isoToDatetime6("2026-01-13T02:29:56.70212399+00:00"));
-        System.out.println(TimeUtils.isoToDatetime6("2026-01-13T02:29:56.70212344+00:00"));
+        System.out.println(TimeUtils.isoToDatetime6("2026-01-13T02:29:56.70212899+00:00"));
+        System.out.println(TimeUtils.isoToDatetime6("2026-01-13T02:29:56.70212844+00:00"));
         System.out.println(TimeUtils.isoToDatetime6("2026-01-13T02:29:56.702+00:00"));
         System.out.println(TimeUtils.isoToDatetime6("2026-01-13T02:29:56.7020000+00:00"));
         System.out.println(TimeUtils.isoToDatetime6("2026-01-13T02:29:56.7020000Z"));
