@@ -76,7 +76,7 @@ public class TopologyMaker { // extends Security
 
                 ObjectNode payloadNode = objectMapper.createObjectNode();
                 payloadNode.put("server_no", jsonNode.get("server_no").asInt());
-                payloadNode.put("date_time", TimeUtils.convert(jsonNode.get("date_time").asText()));
+                payloadNode.put("date_time", TimeUtils.toMySqlDateTime6(jsonNode.get("date_time").asText()));
                 payloadNode.put("uuid"     , jsonNode.get("uuid").asText());  
                 payloadNode.put("content"  , objectMapper.writeValueAsString(jsonNode));
 
