@@ -19,8 +19,8 @@ public final class TimeUtils {
     // 기본 ISO 파서 (소수점 이하 가변길이 자리수 처리, +09:00 지원, +0900 미지원)
     private static final DateTimeFormatter ISO8601_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME; 
 
-
-    private static final DateTimeFormatter OUTPUT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"); //MySQL datetime(6)
+    //MySQL datetime(6)
+    private static final DateTimeFormatter OUTPUT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"); 
 
 
     public static String convert(String input, DateTimeFormatter inputFormat, DateTimeFormatter outputFormat) {
