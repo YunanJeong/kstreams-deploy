@@ -3,6 +3,8 @@ package io.github.yunanjeong.kafka.streams;
 import java.time.OffsetDateTime;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 
 public final class TimeUtils {
@@ -12,7 +14,7 @@ public final class TimeUtils {
 
     // 재사용 가능하도록 static final로 선언 (Thread safe)
     private static final DateTimeFormatter INPUT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSZ");
-    private static final DateTimeFormatter OUTPUT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
+    private static final DateTimeFormatter OUTPUT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"); //MySQL datetime(6)
 
     public static String convert(String input) {
         /*
@@ -26,5 +28,12 @@ public final class TimeUtils {
         // 변환 후 반환
         LocalDateTime truncatedTime = dateTime.toLocalDateTime().truncatedTo(ChronoUnit.MICROS);
         return truncatedTime.format(OUTPUT_FORMATTER);
+    }
+
+    private static final DateTimeFormatter ISO8601_PARSER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+
+    public static String isoToDatetime6(String input) {
+        LocalDateTime ldt = LocalDateTime.parse(input, ISO8601_PARSER);  // 기본 ISO 파서 (가변 소수점 처리)
+        return ldt.format(OUTPUT_FORMATTER);  
     }
 }
