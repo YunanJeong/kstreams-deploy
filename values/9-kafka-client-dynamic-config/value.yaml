@@ -53,6 +53,9 @@ kafkaClientOverrides: # {}
   # consumer.max.partition.fetch.bytes: "10485760"
   producer.max.request.size: "10485760"
 
+  # 웬만하면 데이터 유실을 막기 위해 acks=all을 기본으로 두자
+  producer.acks: "all" 
+
   # consumer.auto.offset.reset: "earliest"  # earliest(default), latest
   # auto.offset.reset: "earliest"           # used if consumer.auto.offset.reset not set
   # producer.compression.type: none         # none(default), gzip, snappy, lz4, zstd 
