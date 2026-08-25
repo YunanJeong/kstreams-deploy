@@ -1,0 +1,92 @@
+#
+# 헬름차트 kstreams-1.0.0
+#
+# 단일 이미지 + 환경변수로 토폴로지 선택
+#
+# 이미지 안에 여러 스트림 처리 로직(토폴로지)이 함께 들어있고, 환경변수 TOPOLOGY로 하나를 고른다.
+# 실제 서비스에서 같은 도메인의 스트림 처리가 여러 개일 때, 이미지·빌드 파이프라인을 하나로 유지하기 위한 패턴이다.
+#
+# 처리 단위마다 이 value 파일을 복사해 TOPOLOGY와 applicationId만 바꿔 별도 릴리스로 띄운다.
+#   helm install logs-filter  kstreams -f value.yaml --set env.TOPOLOGY=json-filter        --set applicationId=logs-filter
+#   helm install logs-newtype kstreams -f value.yaml --set env.TOPOLOGY=new-logtype-detect --set applicationId=logs-newtype
+#
+# 주의: applicationId(=Kafka consumer group)는 릴리스마다 반드시 달라야 한다.
+#       같으면 서로 다른 로직이 하나의 컨슈머 그룹을 나눠먹어 각자 일부 파티션만 처리하게 된다.
+
+# Pod늘렸을 때 Consumer Group명만 같으면 개발자가 별도 로직을 쓰지 않아도, Kafka가 자동으로 분산처리해줌
+replicas: 1
+podAnnotations: {}
+affinity: {}
+tolerations: {}
+resources: {}
+
+# e.g.)
+# nodeSelector:
+#   alpaka/node-type: worker
+nodeSelector: {}
+
+# Your Streams App Image.
+image:
+  registry: docker.wai
+  repository: "yunan/kstreams-multi-topology"
+  tag: 0.0.1
+
+# 환경변수
+# Streams Java앱 수정없이 helm value에서 변경할 내용들을 환경변수로 처리 (input output 토픽 등)
+# 개별 helm value 항목 생성은 가급적 자제하고 환경변수를 활용하자
+env:
+  TZ: Asia/Seoul
+
+  # 실행할 토폴로지 선택. 없거나 모르는 값이면 앱이 즉시 종료되며 사용 가능한 목록을 로그로 남긴다.
+  #   json-filter         : (stateless) 유효한 JSON 레코드만 출력 토픽으로 통과
+  #   new-logtype-detect  : (stateful)  최근 특정 시간 안에 새로 등장한 로그타입 검출
+  TOPOLOGY: "new-logtype-detect"
+
+  # 공통 (모든 토폴로지가 사용)
+  # input,output 토픽명을 동적으로 수정하고 싶을시, 환경변수로 처리하자.
+  INPUT_TOPIC_REGEX: "test.topic"
+  OUTPUT_TOPIC: "output.topic"
+
+  # new-logtype-detect 전용
+  # 선택되지 않은 토폴로지의 환경변수는 없어도 앱이 뜬다. 선택된 토폴로지의 값만 검증된다.
+  #
+  # 로그타입 값이 들어있는 JSON 필드의 key 이름
+  LOG_TYPE_FIELD: "log_type"
+  # "최근 특정 시간" 구간의 크기. ISO-8601 Duration 표기 (e.g. PT30M, PT1H, P1D)
+  # 이 구간 안에 처음 등장했거나, 이 구간보다 오래 안 보이다가 다시 등장한 로그타입을 신규로 판정
+  NEW_LOGTYPE_WINDOW: "PT1H"
+
+# Maps to Kafka Streams `application.id`
+# 토폴로지(릴리스)마다 다른 값을 줄 것
+applicationId: "streams-consumer-group-name"
+
+kafkaConnection:
+  # Kafka `bootstrap.servers`
+  bootstrapServers: "wsl:9095"
+  readinessCheck:
+    enabled: false
+    image: bitnamilegacy/kafka:4.0.0-debian-12-r10
+
+# Extra Kafka client properties for Streams (env: STREAMS_*).
+# e.g. `producer.max.request.size` -> `STREAMS_PRODUCER_MAX_REQUEST_SIZE`
+kafkaClientOverrides: # {}
+  #  최초실행시(consumer-group이 없을 때) 입력 토픽을 처음(earliest)부터 읽을지, 최신(latest)부터 읽을지 결정
+  #  consumer-group이 있으면 아무리 재실행해도 consumer-group의 설정을 따름
+  #  보통 consumer의 default는 latest이지만, <<KStreams에서의 default는 earliest임>>
+  consumer.auto.offset.reset: "earliest"
+  producer.compression.type: gzip
+
+  # 단일 메시지 크기 10MB까지 처리하기 위한 설정
+  # consumer.fetch.max.bytes: "10485760"
+  # consumer.max.partition.fetch.bytes: "10485760"
+  producer.max.request.size: "10485760"
+
+  # 웬만하면 데이터 유실을 막기 위해 acks=all을 기본으로 두자 # 회계/정산류 데이터에 필수
+  producer.acks: "all"
+
+  # consumer.auto.offset.reset: "earliest"  # earliest(default), latest
+  # auto.offset.reset: "earliest"           # used if consumer.auto.offset.reset not set
+  # producer.compression.type: none         # none(default), gzip, snappy, lz4, zstd
+  # consumer.fetch.max.bytes: "1048576"
+  # consumer.max.partition.fetch.bytes: 1048576
+  # producer.max.request.size: "1048576"
