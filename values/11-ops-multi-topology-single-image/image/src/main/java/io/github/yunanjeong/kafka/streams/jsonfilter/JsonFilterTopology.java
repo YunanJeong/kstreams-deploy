@@ -1,4 +1,4 @@
-package io.github.yunanjeong.kafka.streams.topologies.jsonfilter;
+package io.github.yunanjeong.kafka.streams.jsonfilter;
 
 import java.util.regex.Pattern;
 
@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.github.yunanjeong.kafka.streams.TopologyConfig;
 import io.github.yunanjeong.kafka.streams.serdes.JsonNodeSerde;
-import io.github.yunanjeong.kafka.streams.topologies.TopologyProvider;
 
 /**
  * stateless 예시: 역직렬화에 실패한 레코드를 걸러 출력 토픽으로 흘려보낸다.
@@ -24,27 +23,19 @@ import io.github.yunanjeong.kafka.streams.topologies.TopologyProvider;
  *   INPUT_TOPIC_REGEX : 입력 토픽 패턴
  *   OUTPUT_TOPIC      : 출력 토픽
  */
-public class JsonFilterTopology implements TopologyProvider {
+public final class JsonFilterTopology {
 
     private static final Logger LOG = LoggerFactory.getLogger(JsonFilterTopology.class);
 
-    @Override
-    public String name() {
-        return "json-filter";
+    private JsonFilterTopology() {
     }
 
-    @Override
-    public String description() {
-        return "stateless: 유효한 JSON 레코드만 출력 토픽으로 통과";
-    }
-
-    @Override
-    public Topology build(TopologyConfig config) {
+    public static Topology build(TopologyConfig config) {
 
         Pattern inputTopicRegex = Pattern.compile(config.require("INPUT_TOPIC_REGEX"));
         String outputTopic = config.require("OUTPUT_TOPIC");
 
-        LOG.info("Building topology [{}]: {} -> {}", name(), inputTopicRegex, outputTopic);
+        LOG.info("Building topology: {} -> {}", inputTopicRegex, outputTopic);
 
         StreamsBuilder streamsBuilder = new StreamsBuilder();
         JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();

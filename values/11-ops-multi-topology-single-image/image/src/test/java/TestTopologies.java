@@ -1,4 +1,6 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
@@ -20,13 +22,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import io.github.yunanjeong.kafka.streams.App;
 import io.github.yunanjeong.kafka.streams.TopologyConfig;
 import io.github.yunanjeong.kafka.streams.serdes.JsonNodeSerde;
-import io.github.yunanjeong.kafka.streams.topologies.TopologyRegistry;
 
 /*
  * 각 토폴로지의 로직 테스트.
  * 설정값을 TopologyConfig로 주입받으므로 환경변수 stub 없이 테스트할 수 있다.
+ * App.buildTopology를 통과하므로 TOPOLOGY 선택 switch도 함께 검증된다.
  */
 public class TestTopologies {
 
@@ -45,7 +48,7 @@ public class TestTopologies {
     }
 
     private static Topology topology(String name, Map<String, String> config) {
-        return TopologyRegistry.find(name).orElseThrow().build(TopologyConfig.of(config));
+        return App.buildTopology(name, TopologyConfig.of(config));
     }
 
     private static JsonNode log(String logType) {
@@ -191,5 +194,42 @@ public class TestTopologies {
             assertEquals("PT1H", alert.get("window").asText());
             assertTrue(alert.get("previous_seen_at").isNull());
         }
+    }
+
+    // --- TOPOLOGY 선택 ---
+
+    private static final Map<String, String> ONLY_COMMON = Map.of(
+        "INPUT_TOPIC_REGEX", INPUT_TOPIC,
+        "OUTPUT_TOPIC", OUTPUT_TOPIC
+    );
+
+    @Test
+    @DisplayName("모르는 TOPOLOGY 값은 후보 목록과 함께 실패한다")
+    public void unknownTopologyFails() {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+            () -> topology("no-such-topology", ONLY_COMMON));
+
+        assertTrue(e.getMessage().contains("no-such-topology"), e.getMessage());
+        assertTrue(e.getMessage().contains("json-filter"), e.getMessage());
+        assertTrue(e.getMessage().contains("new-logtype-detect"), e.getMessage());
+    }
+
+    /*
+     * 단일 이미지 패턴의 핵심 요건.
+     * 고른 것만 build되므로, 선택되지 않은 스트림 처리의 환경변수는 없어도 된다.
+     * (설정값을 static 필드에서 읽으면 여기서 깨진다)
+     */
+    @Test
+    @DisplayName("선택한 처리의 환경변수만 있으면 나머지가 없어도 빌드된다")
+    public void unselectedTopologyConfigIsNotRequired() {
+        assertNotNull(topology("json-filter", ONLY_COMMON));
+    }
+
+    @Test
+    @DisplayName("선택한 처리의 필수 환경변수가 없으면 빌드 시점에 실패한다")
+    public void missingRequiredConfigFails() {
+        // new-logtype-detect는 LOG_TYPE_FIELD, NEW_LOGTYPE_WINDOW가 더 필요하다
+        assertThrows(IllegalArgumentException.class,
+            () -> topology("new-logtype-detect", ONLY_COMMON));
     }
 }

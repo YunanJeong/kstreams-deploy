@@ -1,4 +1,4 @@
-package io.github.yunanjeong.kafka.streams.topologies.newlogtype;
+package io.github.yunanjeong.kafka.streams.newlogtype;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
@@ -33,15 +33,19 @@ import java.util.Set;
  * - 윈도우를 벗어난 항목은 주기적으로 제거하여 저장소 크기를 윈도우 크기에 비례하도록 유지한다.
  *
  * 설정값(로그타입 필드명, 윈도우)은 생성자로 주입받는다. 환경변수 읽기는 호출측 책임.
+ *
+ * NewLogTypeTopology 전용 헬퍼이므로 public이 아니다. 같은 패키지 밖에서는 보이지 않으므로,
+ * 다른 스트림 처리가 실수로 끌어다 쓰는 일이 컴파일 단계에서 막힌다.
+ * 여러 스트림 처리가 공유해야 하는 물건이 생기면 그때 상위 패키지로 올리고 public으로 연다.
  */
-public class NewLogTypeDetector implements Processor<String, JsonNode, String, JsonNode> {
+class NewLogTypeDetector implements Processor<String, JsonNode, String, JsonNode> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NewLogTypeDetector.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     // 로그타입별 "최종 등장 시각"을 담는 상태저장소 이름
     // persistentKeyValueStore -> 로컬은 RocksDB, 복구용 원격 백업은 changelog 토픽(자동 생성)
-    public static final String STORE_NAME = "logtype-last-seen-store";
+    static final String STORE_NAME = "logtype-last-seen-store";
 
     private final String logTypeField;
     private final Duration window;
@@ -50,7 +54,7 @@ public class NewLogTypeDetector implements Processor<String, JsonNode, String, J
     private ProcessorContext<String, JsonNode> context;
     private KeyValueStore<String, Long> store;
 
-    public NewLogTypeDetector(String logTypeField, Duration window) {
+    NewLogTypeDetector(String logTypeField, Duration window) {
         this.logTypeField = Objects.requireNonNull(logTypeField, "logTypeField");
         this.window = Objects.requireNonNull(window, "window");
         this.windowMs = window.toMillis();
@@ -65,7 +69,7 @@ public class NewLogTypeDetector implements Processor<String, JsonNode, String, J
      * @param logTypeField 로그타입 값이 들어있는 JSON 필드의 key 이름
      * @param window       "최근 특정 시간" 구간의 크기
      */
-    public static ProcessorSupplier<String, JsonNode, String, JsonNode> supplier(String logTypeField, Duration window) {
+    static ProcessorSupplier<String, JsonNode, String, JsonNode> supplier(String logTypeField, Duration window) {
         return new ProcessorSupplier<String, JsonNode, String, JsonNode>() {
 
             @Override

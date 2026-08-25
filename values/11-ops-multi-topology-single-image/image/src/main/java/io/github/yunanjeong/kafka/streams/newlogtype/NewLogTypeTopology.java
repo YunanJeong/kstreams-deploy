@@ -1,4 +1,4 @@
-package io.github.yunanjeong.kafka.streams.topologies.newlogtype;
+package io.github.yunanjeong.kafka.streams.newlogtype;
 
 import java.time.Duration;
 import java.util.regex.Pattern;
@@ -16,11 +16,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.github.yunanjeong.kafka.streams.TopologyConfig;
 import io.github.yunanjeong.kafka.streams.serdes.JsonNodeSerde;
-import io.github.yunanjeong.kafka.streams.topologies.TopologyProvider;
 
 /**
  * stateful 예시: 최근 특정 시간 안에 새로 등장한 로그타입을 검출해 출력 토픽으로 내보낸다.
  * (상태저장소 = 로컬 RocksDB + changelog 토픽)
+ *
+ * 검출 로직은 같은 패키지의 NewLogTypeDetector에 있다. 이 스트림 처리 전용 헬퍼이며,
+ * 패키지 밖으로 공개하지 않는다.
  *
  * 사용 환경변수
  *   INPUT_TOPIC_REGEX  : 입력 토픽 패턴
@@ -28,30 +30,22 @@ import io.github.yunanjeong.kafka.streams.topologies.TopologyProvider;
  *   LOG_TYPE_FIELD     : 로그타입 값이 들어있는 JSON 필드의 key 이름 (e.g. "log_type")
  *   NEW_LOGTYPE_WINDOW : "최근 특정 시간" 구간의 크기, ISO-8601 Duration 표기 (e.g. "PT30M", "PT1H", "P1D")
  */
-public class NewLogTypeTopology implements TopologyProvider {
+public final class NewLogTypeTopology {
 
     private static final Logger LOG = LoggerFactory.getLogger(NewLogTypeTopology.class);
 
-    @Override
-    public String name() {
-        return "new-logtype-detect";
+    private NewLogTypeTopology() {
     }
 
-    @Override
-    public String description() {
-        return "stateful: 최근 특정 시간 안에 새로 등장한 로그타입 검출";
-    }
-
-    @Override
-    public Topology build(TopologyConfig config) {
+    public static Topology build(TopologyConfig config) {
 
         Pattern inputTopicRegex = Pattern.compile(config.require("INPUT_TOPIC_REGEX"));
         String outputTopic = config.require("OUTPUT_TOPIC");
         String logTypeField = config.require("LOG_TYPE_FIELD");
         Duration window = config.requireDuration("NEW_LOGTYPE_WINDOW");
 
-        LOG.info("Building topology [{}]: {} -> {} (field={}, window={})",
-            name(), inputTopicRegex, outputTopic, logTypeField, window);
+        LOG.info("Building topology: {} -> {} (field={}, window={})",
+            inputTopicRegex, outputTopic, logTypeField, window);
 
         StreamsBuilder streamsBuilder = new StreamsBuilder();
         JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();

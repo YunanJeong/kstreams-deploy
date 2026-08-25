@@ -28,7 +28,7 @@ nodeSelector: {}
 # Your Streams App Image.
 image:
   registry: docker.wai
-  repository: "yunan/kstreams-multi-topology"
+  repository: "yunan/kstreams-multi-topology-single-image"
   tag: 0.0.1
 
 # 환경변수
@@ -37,9 +37,15 @@ image:
 env:
   TZ: Asia/Seoul
 
-  # 실행할 토폴로지 선택. 없거나 모르는 값이면 앱이 즉시 종료되며 사용 가능한 목록을 로그로 남긴다.
+  # 실행할 토폴로지 선택.
   #   json-filter         : (stateless) 유효한 JSON 레코드만 출력 토픽으로 통과
   #   new-logtype-detect  : (stateful)  최근 특정 시간 안에 새로 등장한 로그타입 검출
+  #
+  # 필수다. 안 주거나 모르는 값을 주면 앱이 즉시 종료되며 후보 목록을 로그로 남긴다.
+  # (오타를 조용히 삼키지 않는다)
+  #
+  # 스트림 처리 하나로 시작해서 이 줄을 생략하고 싶으면 App.buildTopology 호출측을
+  # config.require(TOPOLOGY_ENV) -> config.get(TOPOLOGY_ENV, "그-이름") 으로 바꾼다.
   TOPOLOGY: "new-logtype-detect"
 
   # 공통 (모든 토폴로지가 사용)
