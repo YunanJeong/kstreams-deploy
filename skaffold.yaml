@@ -1,5 +1,5 @@
-apiVersion: skaffold/v4beta3 
-kind: Config 
+apiVersion: skaffold/v4beta3
+kind: Config
 
 build:
   local:
@@ -7,7 +7,7 @@ build:
   artifacts: []
   #  - image: xxxxx              # 생성할 이미지 이름(repository) 지정
   #    context: xxx/xxx          # dockerfile 및 관련 파일 위치
-  
+
 deploy:
   helm:                          # skaffold로 deploy동작이 포함된 명령어 실행시, helm으로 이를 수행하겠다는 뜻
     releases: []
@@ -20,117 +20,53 @@ deploy:
 
 # skaffold 실행시 profile을 선택하여 위 build, deploy 등에 Override할 수 있다.
 
+# ============================================================================
+# 작명 규칙 — 예시 하나당 "슬러그" 하나만 정하고 나머지는 전부 여기서 파생시킨다.
+#
+#   디렉토리   values/<번호>-<축>-<슬러그>/     e.g. values/01-logic-branch-deprecated/
+#   프로필     <슬러그>                              branch-deprecated
+#   이미지     kstreams-<슬러그>                     kstreams-branch-deprecated
+#   릴리즈     kstreams-<슬러그>                     kstreams-branch-deprecated
+#   템플릿변수 IMAGE_*_<이미지명의 - 를 _ 로>         IMAGE_*_kstreams_branch_deprecated
+#
+# 마지막 줄이 이 규칙의 존재 이유다. skaffold는 artifact 이름의 `/ - . :` 를 `_` 로 바꿔
+# 변수 접미사를 만드는데, 이걸 손으로 적다 틀리면 정의되지 않은 변수가 빈 문자열로
+# 조용히 렌더링된다. 슬러그를 복사해 넣으면 그 실수가 나올 수 없다.
+#
+# 새 예시 추가시: 같은 차트 세대의 기존 프로필을 복사하고 슬러그만 일괄 치환할 것.
+#
+# 프로필은 디렉토리 번호 순으로 나열한다.
+#
+# 차트 세대가 둘이라 setValueTemplates 모양도 두 가지다. (09번부터 1.0.0)
+#   kstreams-0.0.5 : streams.image.*  /  streams.kafka.readinessCheck.enabled   /  streams.nodeSelector
+#   kstreams-1.0.0 : image.*          /  kafkaConnection.readinessCheck.enabled /  nodeSelector
+# ============================================================================
+
 profiles:
-  - name: json-check-error-routing
-    patches:
-      - op: add
-        path: /build/artifacts
-        value:
-          - image: kstreams-json-check-error-routing
-            context: values/6-json-check-error-routing/image/
-      - op: add
-        path: /deploy/helm/releases
-        value:
-          - name: kstreams-mavenapp-java17-sample
-            chartPath: chartrepo/kstreams-0.0.5.tgz
-            skipBuildDependencies: true
-            setValueTemplates:
-              streams.kafka.readinessCheck.enabled: false
-              streams.nodeSelector: "null"
-              streams.image.registry:   "{{ .IMAGE_DOMAIN_kstreams_mavenapp_java17 }}"
-              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_mavenapp_java17 }}"
-              streams.image.tag:        "{{ .IMAGE_TAG_kstreams_mavenapp_java17 }}" 
-            valuesFiles:
-              - values/6-json-check-error-routing/value.yaml
 
-  - name: mavenapp-java17  # java17, streams 및 기타 종속성들 전부 최신화한 샘플
-    patches:
-      - op: add
-        path: /build/artifacts
-        value:
-          - image: kstreams-mavenapp-java17
-            context: values/5-mavenapp-java17/image/
-      - op: add
-        path: /deploy/helm/releases
-        value:
-          - name: kstreams-mavenapp-java17-sample
-            chartPath: chartrepo/kstreams-0.0.5.tgz
-            skipBuildDependencies: true
-            setValueTemplates:
-              streams.kafka.readinessCheck.enabled: false
-              streams.nodeSelector: "null"
-              streams.image.registry:   "{{ .IMAGE_DOMAIN_kstreams_mavenapp_java17 }}"
-              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_mavenapp_java17 }}"
-              streams.image.tag:        "{{ .IMAGE_TAG_kstreams_mavenapp_java17 }}" 
-            valuesFiles:
-              - values/5-mavenapp-java17/value.yaml
+  # ---------- kstreams-0.0.5 세대 (00 ~ 08) ----------
 
-  - name: mavenapp
+  - name: filter-multitopic-regex
     patches:
       - op: add
         path: /build/artifacts
         value:
-          - image: kstreams-mavenapp   
-            context: values/4-mavenapp/image/
+          - image: kstreams-filter-multitopic-regex
+            context: values/00-logic-filter-multitopic-regex/image/
       - op: add
         path: /deploy/helm/releases
         value:
-          - name: kstreams-mavenapp-sample
+          - name: kstreams-filter-multitopic-regex
             chartPath: chartrepo/kstreams-0.0.5.tgz
             skipBuildDependencies: true
             setValueTemplates:
               streams.kafka.readinessCheck.enabled: false
               streams.nodeSelector: "null"
-              streams.image.registry: "{{ .IMAGE_DOMAIN_kstreams_mavenapp }}"
-              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_mavenapp }}"
-              streams.image.tag: "{{ .IMAGE_TAG_kstreams_mavenapp }}" 
+              streams.image.registry:   "{{ .IMAGE_DOMAIN_kstreams_filter_multitopic_regex }}"
+              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_filter_multitopic_regex }}"
+              streams.image.tag:        "{{ .IMAGE_TAG_kstreams_filter_multitopic_regex }}"
             valuesFiles:
-              - values/4-mavenapp/value.yaml
-      
-  - name: gradleapp
-    patches:
-      - op: add
-        path: /build/artifacts
-        value:
-          - image: kstreams-gradleapp   
-            context: values/3-gradleapp/image/
-      - op: add
-        path: /deploy/helm/releases
-        value:
-          - name: kstreams-gradleapp-sample
-            chartPath: chartrepo/kstreams-0.0.5.tgz
-            skipBuildDependencies: true
-            setValueTemplates:
-              streams.kafka.readinessCheck.enabled: false
-              streams.nodeSelector: "null"
-              streams.image.registry: "{{ .IMAGE_DOMAIN_kstreams_gradleapp }}"
-              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_gradleapp }}"
-              streams.image.tag: "{{ .IMAGE_TAG_kstreams_gradleapp }}"
-            valuesFiles:
-              - values/3-gradleapp/value.yaml
-
-  - name: my-first-streams
-    patches:
-      - op: add
-        path: /build/artifacts
-        value:
-          - image: kstreams-my-first-streams   
-            context: values/0-filter-multitopic-regex/image/
-      - op: add
-        path: /deploy/helm/releases
-        value:
-          - name: kstreams-my-first-streams
-            chartPath: chartrepo/kstreams-0.0.5.tgz
-            skipBuildDependencies: true
-            setValueTemplates:
-              streams.kafka.readinessCheck.enabled: false
-              streams.nodeSelector: "null"
-              streams.image.registry: "{{ .IMAGE_DOMAIN_kstreams_my_first_streams }}"
-              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_my_first_streams }}"
-              streams.image.tag: "{{ .IMAGE_TAG_kstreams_my_first_streams }}"
-            valuesFiles:
-              - values/0-filter-multitopic-regex/value.yaml
-
+              - values/00-logic-filter-multitopic-regex/value.yaml
 
   - name: branch-deprecated
     patches:
@@ -138,7 +74,7 @@ profiles:
         path: /build/artifacts
         value:
           - image: kstreams-branch-deprecated
-            context: values/1-branch-deprecated/image/
+            context: values/01-logic-branch-deprecated/image/
       - op: add
         path: /deploy/helm/releases
         value:
@@ -148,19 +84,19 @@ profiles:
             setValueTemplates:
               streams.kafka.readinessCheck.enabled: false
               streams.nodeSelector: "null"
-              streams.image.registry: "{{ .IMAGE_DOMAIN_branch_deprecated }}"
-              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_branch_deprecated }}"
-              streams.image.tag: "{{ .IMAGE_TAG_branch_deprecated }}"
+              streams.image.registry:   "{{ .IMAGE_DOMAIN_kstreams_branch_deprecated }}"
+              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_branch_deprecated }}"
+              streams.image.tag:        "{{ .IMAGE_TAG_kstreams_branch_deprecated }}"
             valuesFiles:
-              - values/1-branch-deprecated/value.yaml
+              - values/01-logic-branch-deprecated/value.yaml
 
   - name: branch-split
     patches:
       - op: add
         path: /build/artifacts
         value:
-          - image: kstreams-branch-split   
-            context: values/2-branch-split/image/
+          - image: kstreams-branch-split
+            context: values/02-logic-branch-split/image/
       - op: add
         path: /deploy/helm/releases
         value:
@@ -170,8 +106,230 @@ profiles:
             setValueTemplates:
               streams.kafka.readinessCheck.enabled: false
               streams.nodeSelector: "null"
-              streams.image.registry: "{{ .IMAGE_DOMAIN_branch_split }}"
-              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_branch_split }}"
-              streams.image.tag: "{{ .IMAGE_TAG_branch_split }}"
+              streams.image.registry:   "{{ .IMAGE_DOMAIN_kstreams_branch_split }}"
+              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_branch_split }}"
+              streams.image.tag:        "{{ .IMAGE_TAG_kstreams_branch_split }}"
             valuesFiles:
-              - values/2-branch-split/value.yaml
+              - values/02-logic-branch-split/value.yaml
+
+  - name: gradleapp
+    patches:
+      - op: add
+        path: /build/artifacts
+        value:
+          - image: kstreams-gradleapp
+            context: values/03-build-gradleapp/image/
+      - op: add
+        path: /deploy/helm/releases
+        value:
+          - name: kstreams-gradleapp
+            chartPath: chartrepo/kstreams-0.0.5.tgz
+            skipBuildDependencies: true
+            setValueTemplates:
+              streams.kafka.readinessCheck.enabled: false
+              streams.nodeSelector: "null"
+              streams.image.registry:   "{{ .IMAGE_DOMAIN_kstreams_gradleapp }}"
+              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_gradleapp }}"
+              streams.image.tag:        "{{ .IMAGE_TAG_kstreams_gradleapp }}"
+            valuesFiles:
+              - values/03-build-gradleapp/value.yaml
+
+  - name: mavenapp
+    patches:
+      - op: add
+        path: /build/artifacts
+        value:
+          - image: kstreams-mavenapp
+            context: values/04-build-mavenapp/image/
+      - op: add
+        path: /deploy/helm/releases
+        value:
+          - name: kstreams-mavenapp
+            chartPath: chartrepo/kstreams-0.0.5.tgz
+            skipBuildDependencies: true
+            setValueTemplates:
+              streams.kafka.readinessCheck.enabled: false
+              streams.nodeSelector: "null"
+              streams.image.registry:   "{{ .IMAGE_DOMAIN_kstreams_mavenapp }}"
+              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_mavenapp }}"
+              streams.image.tag:        "{{ .IMAGE_TAG_kstreams_mavenapp }}"
+            valuesFiles:
+              - values/04-build-mavenapp/value.yaml
+
+  - name: mavenapp-java17   # java17, streams 및 기타 종속성들 전부 최신화한 샘플
+    patches:
+      - op: add
+        path: /build/artifacts
+        value:
+          - image: kstreams-mavenapp-java17
+            context: values/05-build-mavenapp-java17/image/
+      - op: add
+        path: /deploy/helm/releases
+        value:
+          - name: kstreams-mavenapp-java17
+            chartPath: chartrepo/kstreams-0.0.5.tgz
+            skipBuildDependencies: true
+            setValueTemplates:
+              streams.kafka.readinessCheck.enabled: false
+              streams.nodeSelector: "null"
+              streams.image.registry:   "{{ .IMAGE_DOMAIN_kstreams_mavenapp_java17 }}"
+              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_mavenapp_java17 }}"
+              streams.image.tag:        "{{ .IMAGE_TAG_kstreams_mavenapp_java17 }}"
+            valuesFiles:
+              - values/05-build-mavenapp-java17/value.yaml
+
+  - name: json-check-error-routing
+    patches:
+      - op: add
+        path: /build/artifacts
+        value:
+          - image: kstreams-json-check-error-routing
+            context: values/06-logic-json-check-error-routing/image/
+      - op: add
+        path: /deploy/helm/releases
+        value:
+          - name: kstreams-json-check-error-routing
+            chartPath: chartrepo/kstreams-0.0.5.tgz
+            skipBuildDependencies: true
+            setValueTemplates:
+              streams.kafka.readinessCheck.enabled: false
+              streams.nodeSelector: "null"
+              streams.image.registry:   "{{ .IMAGE_DOMAIN_kstreams_json_check_error_routing }}"
+              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_json_check_error_routing }}"
+              streams.image.tag:        "{{ .IMAGE_TAG_kstreams_json_check_error_routing }}"
+            valuesFiles:
+              - values/06-logic-json-check-error-routing/value.yaml
+
+  - name: schema-injection-for-db
+    patches:
+      - op: add
+        path: /build/artifacts
+        value:
+          - image: kstreams-schema-injection-for-db
+            context: values/07-logic-schema-injection-for-db/image/
+      - op: add
+        path: /deploy/helm/releases
+        value:
+          - name: kstreams-schema-injection-for-db
+            chartPath: chartrepo/kstreams-0.0.5.tgz
+            skipBuildDependencies: true
+            setValueTemplates:
+              streams.kafka.readinessCheck.enabled: false
+              streams.nodeSelector: "null"
+              streams.image.registry:   "{{ .IMAGE_DOMAIN_kstreams_schema_injection_for_db }}"
+              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_schema_injection_for_db }}"
+              streams.image.tag:        "{{ .IMAGE_TAG_kstreams_schema_injection_for_db }}"
+            valuesFiles:
+              - values/07-logic-schema-injection-for-db/value.yaml
+
+  - name: time-based-topic-spliter
+    patches:
+      - op: add
+        path: /build/artifacts
+        value:
+          - image: kstreams-time-based-topic-spliter
+            context: values/08-logic-time-based-topic-spliter/image/
+      - op: add
+        path: /deploy/helm/releases
+        value:
+          - name: kstreams-time-based-topic-spliter
+            chartPath: chartrepo/kstreams-0.0.5.tgz
+            skipBuildDependencies: true
+            setValueTemplates:
+              streams.kafka.readinessCheck.enabled: false
+              streams.nodeSelector: "null"
+              streams.image.registry:   "{{ .IMAGE_DOMAIN_kstreams_time_based_topic_spliter }}"
+              streams.image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_time_based_topic_spliter }}"
+              streams.image.tag:        "{{ .IMAGE_TAG_kstreams_time_based_topic_spliter }}"
+            valuesFiles:
+              - values/08-logic-time-based-topic-spliter/value.yaml
+
+  # ---------- kstreams-1.0.0 세대 (09 ~) ----------
+  # value 스키마가 streams.* 중첩에서 top-level로 평탄화됐다.
+
+  - name: kafka-client-dynamic-config
+    patches:
+      - op: add
+        path: /build/artifacts
+        value:
+          - image: kstreams-kafka-client-dynamic-config
+            context: values/09-ops-kafka-client-dynamic-config/image/
+      - op: add
+        path: /deploy/helm/releases
+        value:
+          - name: kstreams-kafka-client-dynamic-config
+            chartPath: chartrepo/kstreams-1.0.0.tgz
+            skipBuildDependencies: true
+            setValueTemplates:
+              kafkaConnection.readinessCheck.enabled: false
+              nodeSelector: "null"
+              image.registry:   "{{ .IMAGE_DOMAIN_kstreams_kafka_client_dynamic_config }}"
+              image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_kafka_client_dynamic_config }}"
+              image.tag:        "{{ .IMAGE_TAG_kstreams_kafka_client_dynamic_config }}"
+            valuesFiles:
+              - values/09-ops-kafka-client-dynamic-config/value.yaml
+
+  - name: stateful-streams
+    patches:
+      - op: add
+        path: /build/artifacts
+        value:
+          - image: kstreams-stateful-streams
+            context: values/10-logic-stateful-streams/image/
+      - op: add
+        path: /deploy/helm/releases
+        value:
+          - name: kstreams-stateful-streams
+            chartPath: chartrepo/kstreams-1.0.0.tgz
+            skipBuildDependencies: true
+            setValueTemplates:
+              kafkaConnection.readinessCheck.enabled: false
+              nodeSelector: "null"
+              image.registry:   "{{ .IMAGE_DOMAIN_kstreams_stateful_streams }}"
+              image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_stateful_streams }}"
+              image.tag:        "{{ .IMAGE_TAG_kstreams_stateful_streams }}"
+            valuesFiles:
+              - values/10-logic-stateful-streams/value.yaml
+
+  # 이미지 1개(artifact 1개)로 릴리즈 2개를 띄운다. 이 프로필 자체가 그 패턴의 예시다.
+  # env.TOPOLOGY로 실행할 토폴로지를 고르고, applicationId(=consumer group)는 릴리즈마다 달라야 한다.
+  #
+  # 릴리즈가 여럿이라 작명 규칙의 유일한 예외다. 릴리즈명 = kstreams-<슬러그>-<토폴로지>.
+  # 두번째 릴리즈는 TOPOLOGY 값(new-logtype-detect)을 그대로 붙이면 헬름 릴리즈명 53자
+  # 제한을 넘겨서 -detect 를 뗐다. applicationId는 길이 제한이 없어 값 그대로 쓴다.
+  - name: multi-topology-single-image
+    patches:
+      - op: add
+        path: /build/artifacts
+        value:
+          - image: kstreams-multi-topology-single-image
+            context: values/11-ops-multi-topology-single-image/image/
+      - op: add
+        path: /deploy/helm/releases
+        value:
+          - name: kstreams-multi-topology-single-image-json-filter
+            chartPath: chartrepo/kstreams-1.0.0.tgz
+            skipBuildDependencies: true
+            setValueTemplates:
+              kafkaConnection.readinessCheck.enabled: false
+              nodeSelector: "null"
+              env.TOPOLOGY: "json-filter"
+              applicationId: "kstreams-multi-topology-single-image-json-filter"
+              image.registry:   "{{ .IMAGE_DOMAIN_kstreams_multi_topology_single_image }}"
+              image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_multi_topology_single_image }}"
+              image.tag:        "{{ .IMAGE_TAG_kstreams_multi_topology_single_image }}"
+            valuesFiles:
+              - values/11-ops-multi-topology-single-image/value.yaml
+          - name: kstreams-multi-topology-single-image-new-logtype
+            chartPath: chartrepo/kstreams-1.0.0.tgz
+            skipBuildDependencies: true
+            setValueTemplates:
+              kafkaConnection.readinessCheck.enabled: false
+              nodeSelector: "null"
+              env.TOPOLOGY: "new-logtype-detect"
+              applicationId: "kstreams-multi-topology-single-image-new-logtype-detect"
+              image.registry:   "{{ .IMAGE_DOMAIN_kstreams_multi_topology_single_image }}"
+              image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_multi_topology_single_image }}"
+              image.tag:        "{{ .IMAGE_TAG_kstreams_multi_topology_single_image }}"
+            valuesFiles:
+              - values/11-ops-multi-topology-single-image/value.yaml
