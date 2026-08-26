@@ -41,7 +41,8 @@ public class TopologyMaker { // extends Security
     private static final String LOG_TYPE_FIELD = System.getenv("LOG_TYPE_FIELD");
     private static final Duration NEW_LOGTYPE_WINDOW = Duration.parse(System.getenv("NEW_LOGTYPE_WINDOW"));
 
-    private static final String NEW_LOGTYPE_TOPIC = "new.logtype.topic";
+    // 알림 토픽. 역직렬화 실패 레코드와 신규 로그타입 검출 결과가 같이 모이는 곳이다.
+    private static final String ALERT_TOPIC = System.getenv("ALERT_TOPIC");
 
     private StreamsBuilder streamsBuilder = new StreamsBuilder();
     private JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();
@@ -71,7 +72,7 @@ public class TopologyMaker { // extends Security
             NewLogTypeDetector.supplier(LOG_TYPE_FIELD, NEW_LOGTYPE_WINDOW)
         );
 
-        newLogTypeStream.to(NEW_LOGTYPE_TOPIC, Produced.with(Serdes.String(), jsonNodeSerde));
+        newLogTypeStream.to(ALERT_TOPIC, Produced.with(Serdes.String(), jsonNodeSerde));
 
         return streamsBuilder.build();
     }

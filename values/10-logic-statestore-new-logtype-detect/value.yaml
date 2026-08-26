@@ -17,7 +17,7 @@ nodeSelector: {}
 # Your Streams App Image.
 image:
   registry: docker.wai
-  repository: "yunan/kstreams-kafka-client-dynamic-config"
+  repository: "yunan/kstreams-statestore-new-logtype-detect"
   tag: 0.0.1
 
 # 환경변수
@@ -28,6 +28,10 @@ env:
 
   # input,output 토픽명을 동적으로 수정하고 싶을시, 환경변수로 처리하자.
   INPUT_TOPIC_REGEX: "test.topic"
+
+  # 알림 토픽. 신규 로그타입 검출 결과가 여기로 간다.
+  # 역직렬화 실패 레코드와 같은 뼈대(detected_at, 마커 필드, data)로 나가므로 소비자가 한 곳에서 받는다.
+  ALERT_TOPIC: "alert.topic"
 
   # 신규 로그타입 검사 (stateful)
   # 로그타입 값이 들어있는 JSON 필드의 key 이름

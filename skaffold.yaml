@@ -269,27 +269,27 @@ profiles:
             valuesFiles:
               - values/09-ops-kafka-client-dynamic-config/value.yaml
 
-  - name: stateful-streams
+  - name: statestore-new-logtype-detect
     patches:
       - op: add
         path: /build/artifacts
         value:
-          - image: kstreams-stateful-streams
-            context: values/10-logic-stateful-streams/image/
+          - image: kstreams-statestore-new-logtype-detect
+            context: values/10-logic-statestore-new-logtype-detect/image/
       - op: add
         path: /deploy/helm/releases
         value:
-          - name: kstreams-stateful-streams
+          - name: kstreams-statestore-new-logtype-detect
             chartPath: chartrepo/kstreams-1.0.0.tgz
             skipBuildDependencies: true
             setValueTemplates:
               kafkaConnection.readinessCheck.enabled: false
               nodeSelector: "null"
-              image.registry:   "{{ .IMAGE_DOMAIN_kstreams_stateful_streams }}"
-              image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_stateful_streams }}"
-              image.tag:        "{{ .IMAGE_TAG_kstreams_stateful_streams }}"
+              image.registry:   "{{ .IMAGE_DOMAIN_kstreams_statestore_new_logtype_detect }}"
+              image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_statestore_new_logtype_detect }}"
+              image.tag:        "{{ .IMAGE_TAG_kstreams_statestore_new_logtype_detect }}"
             valuesFiles:
-              - values/10-logic-stateful-streams/value.yaml
+              - values/10-logic-statestore-new-logtype-detect/value.yaml
 
   # 이미지 1개(artifact 1개)로 릴리즈 2개를 띄운다. 이 프로필 자체가 그 패턴의 예시다.
   # env.TOPOLOGY로 실행할 토폴로지를 고르고, applicationId(=consumer group)는 릴리즈마다 달라야 한다.

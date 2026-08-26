@@ -1,8 +1,10 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Properties;
 
@@ -32,13 +34,14 @@ public class TestTopologyMaker {
 
     private static final String LOG_TYPE_FIELD = "log_type";
     private static final String INPUT_TOPIC = "test.topic";
-    private static final String NEW_LOGTYPE_TOPIC = "new.logtype.topic";
+    private static final String ALERT_TOPIC = "alert.topic";
     private static final Duration WINDOW = Duration.ofHours(1);
 
     @SystemStub
     private EnvironmentVariables env =
         new EnvironmentVariables(
             "INPUT_TOPIC_REGEX", INPUT_TOPIC,
+            "ALERT_TOPIC", ALERT_TOPIC,
             "LOG_TYPE_FIELD", LOG_TYPE_FIELD,
             "NEW_LOGTYPE_WINDOW", "PT1H"
         );
@@ -72,7 +75,7 @@ public class TestTopologyMaker {
             TestInputTopic<String, JsonNode> input = driver.createInputTopic(
                 INPUT_TOPIC, Serdes.String().serializer(), jsonNodeSerde.serializer());
             TestOutputTopic<String, JsonNode> alerts = driver.createOutputTopic(
-                NEW_LOGTYPE_TOPIC, Serdes.String().deserializer(), jsonNodeSerde.deserializer());
+                ALERT_TOPIC, Serdes.String().deserializer(), jsonNodeSerde.deserializer());
 
             input.pipeInput("k", log("A"), t0);                                 // 최초 등장 -> 신규
             input.pipeInput("k", log("A"), t0.plus(Duration.ofMinutes(10)));    // 윈도우 내 재등장 -> 신규 아님
@@ -96,7 +99,7 @@ public class TestTopologyMaker {
             TestInputTopic<String, JsonNode> input = driver.createInputTopic(
                 INPUT_TOPIC, Serdes.String().serializer(), jsonNodeSerde.serializer());
             TestOutputTopic<String, JsonNode> alerts = driver.createOutputTopic(
-                NEW_LOGTYPE_TOPIC, Serdes.String().deserializer(), jsonNodeSerde.deserializer());
+                ALERT_TOPIC, Serdes.String().deserializer(), jsonNodeSerde.deserializer());
 
             input.pipeInput("k", log("A"), t0);
             input.pipeInput("k", log("A"), t0.plus(WINDOW).plus(Duration.ofMinutes(1)));
@@ -119,7 +122,7 @@ public class TestTopologyMaker {
             TestInputTopic<String, JsonNode> input = driver.createInputTopic(
                 INPUT_TOPIC, Serdes.String().serializer(), jsonNodeSerde.serializer());
             TestOutputTopic<String, JsonNode> alerts = driver.createOutputTopic(
-                NEW_LOGTYPE_TOPIC, Serdes.String().deserializer(), jsonNodeSerde.deserializer());
+                ALERT_TOPIC, Serdes.String().deserializer(), jsonNodeSerde.deserializer());
 
             ObjectNode noLogType = objectMapper.createObjectNode();
             noLogType.put("message", "some log line");
@@ -130,7 +133,7 @@ public class TestTopologyMaker {
     }
 
     @Test
-    @DisplayName("검출 결과 메시지에 로그타입과 검출 시각이 담긴다")
+    @DisplayName("검출 결과 메시지는 serde의 역직렬화 실패 레코드와 같은 뼈대로 나간다")
     public void alertPayloadContainsLogTypeAndTime() throws Exception {
 
         JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();
@@ -142,16 +145,26 @@ public class TestTopologyMaker {
             TestInputTopic<String, JsonNode> input = driver.createInputTopic(
                 INPUT_TOPIC, Serdes.String().serializer(), jsonNodeSerde.serializer());
             TestOutputTopic<String, JsonNode> alerts = driver.createOutputTopic(
-                NEW_LOGTYPE_TOPIC, Serdes.String().deserializer(), jsonNodeSerde.deserializer());
+                ALERT_TOPIC, Serdes.String().deserializer(), jsonNodeSerde.deserializer());
 
             input.pipeInput("k", log("A"), t0);
 
             JsonNode alert = alerts.readValue();
-            assertEquals("new_log_type", alert.get("event").asText());
+
+            // 마커 필드 — 알림 토픽 소비자가 이걸로 종류를 가른다 (serde는 deserial_error)
+            assertEquals("New log type detected", alert.get("new_logtype_alert").asText());
             assertEquals("A", alert.get(LOG_TYPE_FIELD).asText());
-            assertEquals(t0.toEpochMilli(), alert.get("detected_at").asLong());
             assertEquals("PT1H", alert.get("window").asText());
-            assertTrue(alert.get("previous_seen_at").isNull());
+            assertTrue(alert.get("previous_seen_at").isNull());   // 최초 등장
+
+            // detected_at은 서버 시각이라 값을 고정할 수 없다. RFC3339로 파싱되는지만 확인
+            assertNotNull(OffsetDateTime.parse(alert.get("detected_at").asText()));
+
+            // record_timestamp는 레코드 메타데이터의 시각이라 결정적이다 (pipeInput에 넘긴 값)
+            assertEquals(t0, OffsetDateTime.parse(alert.get("record_timestamp").asText()).toInstant());
+
+            // data는 원본 레코드 (serde의 data와 같은 자리)
+            assertEquals("A", objectMapper.readTree(alert.get("data").asText()).get(LOG_TYPE_FIELD).asText());
         }
     }
 }
