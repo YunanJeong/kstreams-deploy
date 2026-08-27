@@ -27,7 +27,7 @@ import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 
-/* 최근 특정 시간(윈도우) 동안 신규 로그타입이 추가됐는지 검사하는 로직 테스트 */
+/* 신규 로그타입이 추가됐는지 검사하는 로직 테스트 */
 // TopologyMaker의 설정값은 static 필드로 환경변수를 읽으므로, 클래스 최초 로딩 전에 stub이 적용돼야 함
 @ExtendWith(SystemStubsExtension.class)
 public class TestTopologyMaker {
@@ -35,15 +35,13 @@ public class TestTopologyMaker {
     private static final String LOG_TYPE_FIELD = "log_type";
     private static final String INPUT_TOPIC = "test.topic";
     private static final String ALERT_TOPIC = "alert.topic";
-    private static final Duration WINDOW = Duration.ofHours(1);
 
     @SystemStub
     private EnvironmentVariables env =
         new EnvironmentVariables(
             "INPUT_TOPIC_REGEX", INPUT_TOPIC,
             "ALERT_TOPIC", ALERT_TOPIC,
-            "LOG_TYPE_FIELD", LOG_TYPE_FIELD,
-            "NEW_LOGTYPE_WINDOW", "PT1H"
+            "LOG_TYPE_FIELD", LOG_TYPE_FIELD
         );
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -63,7 +61,7 @@ public class TestTopologyMaker {
     }
 
     @Test
-    @DisplayName("윈도우 내 최초 등장 로그타입만 신규로 검출된다")
+    @DisplayName("처음 등장한 로그타입만 신규로 검출된다")
     public void detectNewLogTypeOnlyOnce() throws Exception {
 
         JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();
@@ -78,7 +76,7 @@ public class TestTopologyMaker {
                 ALERT_TOPIC, Serdes.String().deserializer(), jsonNodeSerde.deserializer());
 
             input.pipeInput("k", log("A"), t0);                                 // 최초 등장 -> 신규
-            input.pipeInput("k", log("A"), t0.plus(Duration.ofMinutes(10)));    // 윈도우 내 재등장 -> 신규 아님
+            input.pipeInput("k", log("A"), t0.plus(Duration.ofMinutes(10)));    // 이미 등록됨 -> 신규 아님
             input.pipeInput("k", log("B"), t0.plus(Duration.ofMinutes(20)));    // 최초 등장 -> 신규
 
             List<String> detected = alerts.readKeyValuesToList().stream().map(kv -> kv.key).toList();
@@ -87,8 +85,8 @@ public class TestTopologyMaker {
     }
 
     @Test
-    @DisplayName("윈도우보다 오래 사라졌다가 재등장한 로그타입은 다시 신규로 검출된다")
-    public void detectAgainAfterWindowExpired() throws Exception {
+    @DisplayName("한번 등장한 로그타입은 아무리 오래 뒤에 재등장해도 신규로 검출되지 않는다")
+    public void doNotDetectAgainAfterLongGap() throws Exception {
 
         JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();
         Instant t0 = Instant.parse("2026-08-25T00:00:00Z");
@@ -102,10 +100,10 @@ public class TestTopologyMaker {
                 ALERT_TOPIC, Serdes.String().deserializer(), jsonNodeSerde.deserializer());
 
             input.pipeInput("k", log("A"), t0);
-            input.pipeInput("k", log("A"), t0.plus(WINDOW).plus(Duration.ofMinutes(1)));
+            input.pipeInput("k", log("A"), t0.plus(Duration.ofDays(90)));
 
             List<String> detected = alerts.readKeyValuesToList().stream().map(kv -> kv.key).toList();
-            assertEquals(List.of("A", "A"), detected);
+            assertEquals(List.of("A"), detected);
         }
     }
 
@@ -154,8 +152,6 @@ public class TestTopologyMaker {
             // 마커 필드 — 알림 토픽 소비자가 이걸로 종류를 가른다 (serde는 deserial_error)
             assertEquals("New log type detected", alert.get("new_logtype_alert").asText());
             assertEquals("A", alert.get(LOG_TYPE_FIELD).asText());
-            assertEquals("PT1H", alert.get("window").asText());
-            assertTrue(alert.get("previous_seen_at").isNull());   // 최초 등장
 
             // detected_at은 서버 시각이라 값을 고정할 수 없다. RFC3339로 파싱되는지만 확인
             assertNotNull(OffsetDateTime.parse(alert.get("detected_at").asText()));

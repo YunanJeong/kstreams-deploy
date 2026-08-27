@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -36,7 +37,6 @@ public class TestTopologies {
     private static final String LOG_TYPE_FIELD = "log_type";
     private static final String INPUT_TOPIC = "test.topic";
     private static final String OUTPUT_TOPIC = "output.topic";
-    private static final Duration WINDOW = Duration.ofHours(1);
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -99,13 +99,12 @@ public class TestTopologies {
         return topology("new-logtype-detect", Map.of(
             "INPUT_TOPIC_REGEX", INPUT_TOPIC,
             "OUTPUT_TOPIC", OUTPUT_TOPIC,
-            "LOG_TYPE_FIELD", LOG_TYPE_FIELD,
-            "NEW_LOGTYPE_WINDOW", "PT1H"
+            "LOG_TYPE_FIELD", LOG_TYPE_FIELD
         ));
     }
 
     @Test
-    @DisplayName("[new-logtype-detect] 윈도우 내 최초 등장 로그타입만 신규로 검출된다")
+    @DisplayName("[new-logtype-detect] 처음 등장한 로그타입만 신규로 검출된다")
     public void detectNewLogTypeOnlyOnce() {
 
         JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();
@@ -119,7 +118,7 @@ public class TestTopologies {
                 OUTPUT_TOPIC, Serdes.String().deserializer(), jsonNodeSerde.deserializer());
 
             input.pipeInput("k", log("A"), t0);                                 // 최초 등장 -> 신규
-            input.pipeInput("k", log("A"), t0.plus(Duration.ofMinutes(10)));    // 윈도우 내 재등장 -> 신규 아님
+            input.pipeInput("k", log("A"), t0.plus(Duration.ofMinutes(10)));    // 이미 등록됨 -> 신규 아님
             input.pipeInput("k", log("B"), t0.plus(Duration.ofMinutes(20)));    // 최초 등장 -> 신규
 
             List<String> detected = alerts.readKeyValuesToList().stream().map(kv -> kv.key).toList();
@@ -128,8 +127,8 @@ public class TestTopologies {
     }
 
     @Test
-    @DisplayName("[new-logtype-detect] 윈도우보다 오래 사라졌다가 재등장한 로그타입은 다시 신규로 검출된다")
-    public void detectAgainAfterWindowExpired() {
+    @DisplayName("[new-logtype-detect] 한번 등장한 로그타입은 아무리 오래 뒤에 재등장해도 신규로 검출되지 않는다")
+    public void doNotDetectAgainAfterLongGap() {
 
         JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();
         Instant t0 = Instant.parse("2026-08-25T00:00:00Z");
@@ -142,10 +141,10 @@ public class TestTopologies {
                 OUTPUT_TOPIC, Serdes.String().deserializer(), jsonNodeSerde.deserializer());
 
             input.pipeInput("k", log("A"), t0);
-            input.pipeInput("k", log("A"), t0.plus(WINDOW).plus(Duration.ofMinutes(1)));
+            input.pipeInput("k", log("A"), t0.plus(Duration.ofDays(90)));
 
             List<String> detected = alerts.readKeyValuesToList().stream().map(kv -> kv.key).toList();
-            assertEquals(List.of("A", "A"), detected);
+            assertEquals(List.of("A"), detected);
         }
     }
 
@@ -172,7 +171,7 @@ public class TestTopologies {
     }
 
     @Test
-    @DisplayName("[new-logtype-detect] 검출 결과 메시지에 로그타입과 검출 시각이 담긴다")
+    @DisplayName("[new-logtype-detect] 검출 결과 메시지에 마커 필드, 로그타입, 두 종류의 시각, 원본이 담긴다")
     public void alertPayloadContainsLogTypeAndTime() {
 
         JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();
@@ -188,11 +187,19 @@ public class TestTopologies {
             input.pipeInput("k", log("A"), t0);
 
             JsonNode alert = alerts.readValue();
-            assertEquals("new_log_type", alert.get("event").asText());
+
+            // 마커 필드 — 출력 토픽 소비자가 이걸로 종류를 가른다
+            assertEquals("New log type detected", alert.get("new_logtype_alert").asText());
             assertEquals("A", alert.get(LOG_TYPE_FIELD).asText());
-            assertEquals(t0.toEpochMilli(), alert.get("detected_at").asLong());
-            assertEquals("PT1H", alert.get("window").asText());
-            assertTrue(alert.get("previous_seen_at").isNull());
+
+            // detected_at은 서버 시각이라 값을 고정할 수 없다. RFC3339로 파싱되는지만 확인
+            assertNotNull(OffsetDateTime.parse(alert.get("detected_at").asText()));
+
+            // record_timestamp는 레코드 메타데이터의 시각이라 결정적이다 (pipeInput에 넘긴 값)
+            assertEquals(t0, OffsetDateTime.parse(alert.get("record_timestamp").asText()).toInstant());
+
+            // data는 원본 레코드
+            assertTrue(alert.get("data").asText().contains(LOG_TYPE_FIELD));
         }
     }
 
@@ -228,7 +235,7 @@ public class TestTopologies {
     @Test
     @DisplayName("선택한 처리의 필수 환경변수가 없으면 빌드 시점에 실패한다")
     public void missingRequiredConfigFails() {
-        // new-logtype-detect는 LOG_TYPE_FIELD, NEW_LOGTYPE_WINDOW가 더 필요하다
+        // new-logtype-detect는 LOG_TYPE_FIELD가 더 필요하다
         assertThrows(IllegalArgumentException.class,
             () -> topology("new-logtype-detect", ONLY_COMMON));
     }

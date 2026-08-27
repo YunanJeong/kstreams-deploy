@@ -1,7 +1,5 @@
 package io.github.yunanjeong.kafka.streams;
 
-import java.time.Duration;
-import java.time.format.DateTimeParseException;
 import java.util.Map;
 
 /**
@@ -48,16 +46,5 @@ public class TopologyConfig {
     public String get(String key, String defaultValue) {
         String value = values.get(key);
         return (value == null || value.isBlank()) ? defaultValue : value.trim();
-    }
-
-    /** ISO-8601 Duration 표기 필수값 (e.g. "PT30M", "PT1H", "P1D") */
-    public Duration requireDuration(String key) {
-        String value = require(key);
-        try {
-            return Duration.parse(value);
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException(
-                "Invalid ISO-8601 duration for " + key + ": " + value + " (e.g. PT30M, PT1H, P1D)", e);
-        }
     }
 }

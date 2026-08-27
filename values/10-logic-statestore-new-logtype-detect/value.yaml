@@ -35,10 +35,9 @@ env:
 
   # 신규 로그타입 검사 (stateful)
   # 로그타입 값이 들어있는 JSON 필드의 key 이름
+  # 상태저장소에 등장한 로그타입 목록을 그대로 유지하고, 목록에 없는 로그타입이 오면 신규로 판정
+  # 시간 구간(윈도우) 설정은 없다. 한번 등장한 로그타입은 계속 등록 상태로 남는다
   LOG_TYPE_FIELD: "log_type"
-  # "최근 특정 시간" 구간의 크기. ISO-8601 Duration 표기 (e.g. PT30M, PT1H, P1D)
-  # 이 구간 안에 처음 등장했거나, 이 구간보다 오래 안 보이다가 다시 등장한 로그타입을 신규로 판정
-  NEW_LOGTYPE_WINDOW: "PT1H"
 
 # Maps to Kafka Streams `application.id`
 applicationId: "streams-consumer-group-name"

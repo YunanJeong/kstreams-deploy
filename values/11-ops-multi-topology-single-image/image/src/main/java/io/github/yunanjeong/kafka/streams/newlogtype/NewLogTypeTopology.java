@@ -1,6 +1,5 @@
 package io.github.yunanjeong.kafka.streams.newlogtype;
 
-import java.time.Duration;
 import java.util.regex.Pattern;
 
 import org.apache.kafka.common.serialization.Serdes;
@@ -18,17 +17,16 @@ import io.github.yunanjeong.kafka.streams.TopologyConfig;
 import io.github.yunanjeong.kafka.streams.serdes.JsonNodeSerde;
 
 /**
- * stateful 예시: 최근 특정 시간 안에 새로 등장한 로그타입을 검출해 출력 토픽으로 내보낸다.
+ * stateful 예시: 처음 등장한 로그타입을 검출해 출력 토픽으로 내보낸다.
  * (상태저장소 = 로컬 RocksDB + changelog 토픽)
  *
  * 검출 로직은 같은 패키지의 NewLogTypeDetector에 있다. 이 스트림 처리 전용 헬퍼이며,
  * 패키지 밖으로 공개하지 않는다.
  *
  * 사용 환경변수
- *   INPUT_TOPIC_REGEX  : 입력 토픽 패턴
- *   OUTPUT_TOPIC       : 검출 결과를 내보낼 토픽
- *   LOG_TYPE_FIELD     : 로그타입 값이 들어있는 JSON 필드의 key 이름 (e.g. "log_type")
- *   NEW_LOGTYPE_WINDOW : "최근 특정 시간" 구간의 크기, ISO-8601 Duration 표기 (e.g. "PT30M", "PT1H", "P1D")
+ *   INPUT_TOPIC_REGEX : 입력 토픽 패턴
+ *   OUTPUT_TOPIC      : 검출 결과를 내보낼 토픽
+ *   LOG_TYPE_FIELD    : 로그타입 값이 들어있는 JSON 필드의 key 이름 (e.g. "log_type")
  */
 public final class NewLogTypeTopology {
 
@@ -42,10 +40,9 @@ public final class NewLogTypeTopology {
         Pattern inputTopicRegex = Pattern.compile(config.require("INPUT_TOPIC_REGEX"));
         String outputTopic = config.require("OUTPUT_TOPIC");
         String logTypeField = config.require("LOG_TYPE_FIELD");
-        Duration window = config.requireDuration("NEW_LOGTYPE_WINDOW");
 
-        LOG.info("Building topology: {} -> {} (field={}, window={})",
-            inputTopicRegex, outputTopic, logTypeField, window);
+        LOG.info("Building topology: {} -> {} (field={})",
+            inputTopicRegex, outputTopic, logTypeField);
 
         StreamsBuilder streamsBuilder = new StreamsBuilder();
         JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();
@@ -60,9 +57,9 @@ public final class NewLogTypeTopology {
             (key, value) -> value != null && value.get("deserial_error") == null
         );
 
-        // 최근 window 구간 안에 새로 등장한 로그타입 검출 (상태저장소는 supplier가 함께 제공)
+        // 처음 등장한 로그타입 검출 (상태저장소는 supplier가 함께 제공)
         KStream<String, JsonNode> newLogTypeStream = validStream.process(
-            NewLogTypeDetector.supplier(logTypeField, window)
+            NewLogTypeDetector.supplier(logTypeField)
         );
 
         newLogTypeStream.to(outputTopic, Produced.with(Serdes.String(), jsonNodeSerde));

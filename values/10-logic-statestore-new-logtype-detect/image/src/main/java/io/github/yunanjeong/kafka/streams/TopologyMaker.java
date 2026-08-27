@@ -20,7 +20,6 @@ import io.github.yunanjeong.kafka.streams.serdes.FilebeatJsonDes;
 import io.github.yunanjeong.kafka.streams.serdes.JsonNodeSerde;
 
 import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -36,10 +35,8 @@ public class TopologyMaker { // extends Security
     private static final Pattern INPUT_TOPIC_REGEX = Pattern.compile(System.getenv("INPUT_TOPIC_REGEX"));
 
     // 신규 로그타입 검사용 설정 (환경변수 주입)
-    // LOG_TYPE_FIELD     : 로그타입 값이 들어있는 JSON 필드의 key 이름 (e.g. "log_type")
-    // NEW_LOGTYPE_WINDOW : "최근 특정 시간" 구간의 크기, ISO-8601 Duration 표기 (e.g. "PT30M", "PT1H", "P1D")
+    // LOG_TYPE_FIELD : 로그타입 값이 들어있는 JSON 필드의 key 이름 (e.g. "log_type")
     private static final String LOG_TYPE_FIELD = System.getenv("LOG_TYPE_FIELD");
-    private static final Duration NEW_LOGTYPE_WINDOW = Duration.parse(System.getenv("NEW_LOGTYPE_WINDOW"));
 
     // 알림 토픽. 역직렬화 실패 레코드와 신규 로그타입 검출 결과가 같이 모이는 곳이다.
     private static final String ALERT_TOPIC = System.getenv("ALERT_TOPIC");
@@ -67,9 +64,9 @@ public class TopologyMaker { // extends Security
 
         bizStream.to("output.topic", Produced.with(Serdes.String(), jsonNodeSerde));
 
-        // 최근 NEW_LOGTYPE_WINDOW 구간 안에 새로 등장한 로그타입 검출 (상태저장소는 supplier가 함께 제공)
+        // 처음 등장한 로그타입 검출 (상태저장소는 supplier가 함께 제공)
         KStream<String, JsonNode> newLogTypeStream = bizStream.process(
-            NewLogTypeDetector.supplier(LOG_TYPE_FIELD, NEW_LOGTYPE_WINDOW)
+            NewLogTypeDetector.supplier(LOG_TYPE_FIELD)
         );
 
         newLogTypeStream.to(ALERT_TOPIC, Produced.with(Serdes.String(), jsonNodeSerde));
