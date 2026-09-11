@@ -7,8 +7,9 @@
 # 실제 서비스에서 같은 도메인의 스트림 처리가 여러 개일 때, 이미지·빌드 파이프라인을 하나로 유지하기 위한 패턴이다.
 #
 # 처리 단위마다 이 value 파일을 복사해 TOPOLOGY와 applicationId만 바꿔 별도 릴리스로 띄운다.
-#   helm install logs-filter  kstreams -f value.yaml --set env.TOPOLOGY=json-filter        --set applicationId=logs-filter
-#   helm install logs-newtype kstreams -f value.yaml --set env.TOPOLOGY=new-logtype-detect --set applicationId=logs-newtype
+# 파일 하나로 배포가 끝나게 두고 --set은 쓰지 않는다. 릴리스의 현재 설정이 파일에 그대로 남는다.
+#   helm install logs-jsonfilter kstreams -f value-jsonfilter.yaml
+#   helm install logs-newlogtype kstreams -f value-newlogtype.yaml
 #
 # 주의: applicationId(=Kafka consumer group)는 릴리스마다 반드시 달라야 한다.
 #       같으면 서로 다른 로직이 하나의 컨슈머 그룹을 나눠먹어 각자 일부 파티션만 처리하게 된다.
@@ -38,22 +39,22 @@ env:
   TZ: Asia/Seoul
 
   # 실행할 토폴로지 선택.
-  #   json-filter         : (stateless) 유효한 JSON 레코드만 출력 토픽으로 통과
-  #   new-logtype-detect  : (stateful)  처음 등장한 로그타입 검출
+  #   jsonfilter  : (stateless) 유효한 JSON 레코드만 출력 토픽으로 통과
+  #   newlogtype  : (stateful)  처음 등장한 로그타입 검출
   #
   # 필수다. 안 주거나 모르는 값을 주면 앱이 즉시 종료되며 후보 목록을 로그로 남긴다.
   # (오타를 조용히 삼키지 않는다)
   #
   # 스트림 처리 하나로 시작해서 이 줄을 생략하고 싶으면 App.buildTopology 호출측을
   # config.require(TOPOLOGY_ENV) -> config.get(TOPOLOGY_ENV, "그-이름") 으로 바꾼다.
-  TOPOLOGY: "new-logtype-detect"
+  TOPOLOGY: "newlogtype"
 
   # 공통 (모든 토폴로지가 사용)
   # input,output 토픽명을 동적으로 수정하고 싶을시, 환경변수로 처리하자.
   INPUT_TOPIC_REGEX: "test.topic"
   OUTPUT_TOPIC: "output.topic"
 
-  # new-logtype-detect 전용
+  # newlogtype 전용
   # 선택되지 않은 토폴로지의 환경변수는 없어도 앱이 뜬다. 선택된 토폴로지의 값만 검증된다.
   #
   # 로그타입 값이 들어있는 JSON 필드의 key 이름

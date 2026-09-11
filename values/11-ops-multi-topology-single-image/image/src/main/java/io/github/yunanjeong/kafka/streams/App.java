@@ -74,11 +74,11 @@ public class App {
     public static Topology buildTopology(String name, TopologyConfig config) {
         LOG.info("Selected topology: {}", name);
         return switch (name) {
-            case "json-filter"        -> JsonFilterTopology.build(config);
-            case "new-logtype-detect" -> NewLogTypeTopology.build(config);
+            case "jsonfilter" -> JsonFilterTopology.build(config);
+            case "newlogtype" -> NewLogTypeTopology.build(config);
             default -> throw new IllegalArgumentException(
                 "Unknown " + TOPOLOGY_ENV + ": '" + name + "'"
-                    + " - available: [json-filter, new-logtype-detect]");
+                    + " - available: [jsonfilter, newlogtype]");
         };
     }
 }

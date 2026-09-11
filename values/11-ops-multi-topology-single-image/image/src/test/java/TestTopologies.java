@@ -58,17 +58,17 @@ public class TestTopologies {
         return node;
     }
 
-    // --- json-filter (stateless) ---
+    // --- jsonfilter (stateless) ---
 
     private static Topology jsonFilterTopology() {
-        return topology("json-filter", Map.of(
+        return topology("jsonfilter", Map.of(
             "INPUT_TOPIC_REGEX", INPUT_TOPIC,
             "OUTPUT_TOPIC", OUTPUT_TOPIC
         ));
     }
 
     @Test
-    @DisplayName("[json-filter] 역직렬화 실패 레코드는 걸러지고 나머지는 통과한다")
+    @DisplayName("[jsonfilter] 역직렬화 실패 레코드는 걸러지고 나머지는 통과한다")
     public void jsonFilterPassesValidRecordsOnly() {
 
         JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();
@@ -93,10 +93,10 @@ public class TestTopologies {
         }
     }
 
-    // --- new-logtype-detect (stateful) ---
+    // --- newlogtype (stateful) ---
 
     private static Topology newLogTypeTopology() {
-        return topology("new-logtype-detect", Map.of(
+        return topology("newlogtype", Map.of(
             "INPUT_TOPIC_REGEX", INPUT_TOPIC,
             "OUTPUT_TOPIC", OUTPUT_TOPIC,
             "LOG_TYPE_FIELD", LOG_TYPE_FIELD
@@ -104,7 +104,7 @@ public class TestTopologies {
     }
 
     @Test
-    @DisplayName("[new-logtype-detect] 처음 등장한 로그타입만 신규로 검출된다")
+    @DisplayName("[newlogtype] 처음 등장한 로그타입만 신규로 검출된다")
     public void detectNewLogTypeOnlyOnce() {
 
         JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();
@@ -127,7 +127,7 @@ public class TestTopologies {
     }
 
     @Test
-    @DisplayName("[new-logtype-detect] 한번 등장한 로그타입은 아무리 오래 뒤에 재등장해도 신규로 검출되지 않는다")
+    @DisplayName("[newlogtype] 한번 등장한 로그타입은 아무리 오래 뒤에 재등장해도 신규로 검출되지 않는다")
     public void doNotDetectAgainAfterLongGap() {
 
         JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();
@@ -149,7 +149,7 @@ public class TestTopologies {
     }
 
     @Test
-    @DisplayName("[new-logtype-detect] 로그타입 필드가 없는 레코드는 검사 대상에서 제외된다")
+    @DisplayName("[newlogtype] 로그타입 필드가 없는 레코드는 검사 대상에서 제외된다")
     public void ignoreRecordWithoutLogTypeField() {
 
         JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();
@@ -171,7 +171,7 @@ public class TestTopologies {
     }
 
     @Test
-    @DisplayName("[new-logtype-detect] 검출 결과 메시지에 마커 필드, 로그타입, 두 종류의 시각, 원본이 담긴다")
+    @DisplayName("[newlogtype] 검출 결과 메시지에 마커 필드, 로그타입, 두 종류의 시각, 원본이 담긴다")
     public void alertPayloadContainsLogTypeAndTime() {
 
         JsonNodeSerde jsonNodeSerde = new JsonNodeSerde();
@@ -217,8 +217,8 @@ public class TestTopologies {
             () -> topology("no-such-topology", ONLY_COMMON));
 
         assertTrue(e.getMessage().contains("no-such-topology"), e.getMessage());
-        assertTrue(e.getMessage().contains("json-filter"), e.getMessage());
-        assertTrue(e.getMessage().contains("new-logtype-detect"), e.getMessage());
+        assertTrue(e.getMessage().contains("jsonfilter"), e.getMessage());
+        assertTrue(e.getMessage().contains("newlogtype"), e.getMessage());
     }
 
     /*
@@ -229,14 +229,14 @@ public class TestTopologies {
     @Test
     @DisplayName("선택한 처리의 환경변수만 있으면 나머지가 없어도 빌드된다")
     public void unselectedTopologyConfigIsNotRequired() {
-        assertNotNull(topology("json-filter", ONLY_COMMON));
+        assertNotNull(topology("jsonfilter", ONLY_COMMON));
     }
 
     @Test
     @DisplayName("선택한 처리의 필수 환경변수가 없으면 빌드 시점에 실패한다")
     public void missingRequiredConfigFails() {
-        // new-logtype-detect는 LOG_TYPE_FIELD가 더 필요하다
+        // newlogtype은 LOG_TYPE_FIELD가 더 필요하다
         assertThrows(IllegalArgumentException.class,
-            () -> topology("new-logtype-detect", ONLY_COMMON));
+            () -> topology("newlogtype", ONLY_COMMON));
     }
 }

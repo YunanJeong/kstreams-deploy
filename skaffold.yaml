@@ -295,8 +295,6 @@ profiles:
   # env.TOPOLOGY로 실행할 토폴로지를 고르고, applicationId(=consumer group)는 릴리즈마다 달라야 한다.
   #
   # 릴리즈가 여럿이라 작명 규칙의 유일한 예외다. 릴리즈명 = kstreams-<슬러그>-<토폴로지>.
-  # 두번째 릴리즈는 TOPOLOGY 값(new-logtype-detect)을 그대로 붙이면 헬름 릴리즈명 53자
-  # 제한을 넘겨서 -detect 를 뗐다. applicationId는 길이 제한이 없어 값 그대로 쓴다.
   - name: multi-topology-single-image
     patches:
       - op: add
@@ -307,29 +305,29 @@ profiles:
       - op: add
         path: /deploy/helm/releases
         value:
-          - name: kstreams-multi-topology-single-image-json-filter
+          - name: kstreams-multi-topology-single-image-jsonfilter
             chartPath: chartrepo/kstreams-1.0.0.tgz
             skipBuildDependencies: true
             setValueTemplates:
               kafkaConnection.readinessCheck.enabled: false
               nodeSelector: "null"
-              env.TOPOLOGY: "json-filter"
-              applicationId: "kstreams-multi-topology-single-image-json-filter"
+              env.TOPOLOGY: "jsonfilter"
+              applicationId: "kstreams-multi-topology-single-image-jsonfilter"
               image.registry:   "{{ .IMAGE_DOMAIN_kstreams_multi_topology_single_image }}"
               image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_multi_topology_single_image }}"
               image.tag:        "{{ .IMAGE_TAG_kstreams_multi_topology_single_image }}"
             valuesFiles:
-              - values/11-ops-multi-topology-single-image/value.yaml
-          - name: kstreams-multi-topology-single-image-new-logtype
+              - values/11-ops-multi-topology-single-image/value-newlogtype.yaml
+          - name: kstreams-multi-topology-single-image-newlogtype
             chartPath: chartrepo/kstreams-1.0.0.tgz
             skipBuildDependencies: true
             setValueTemplates:
               kafkaConnection.readinessCheck.enabled: false
               nodeSelector: "null"
-              env.TOPOLOGY: "new-logtype-detect"
-              applicationId: "kstreams-multi-topology-single-image-new-logtype-detect"
+              env.TOPOLOGY: "newlogtype"
+              applicationId: "kstreams-multi-topology-single-image-newlogtype"
               image.registry:   "{{ .IMAGE_DOMAIN_kstreams_multi_topology_single_image }}"
               image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_multi_topology_single_image }}"
               image.tag:        "{{ .IMAGE_TAG_kstreams_multi_topology_single_image }}"
             valuesFiles:
-              - values/11-ops-multi-topology-single-image/value.yaml
+              - values/11-ops-multi-topology-single-image/value-newlogtype.yaml
