@@ -311,21 +311,17 @@ profiles:
             setValueTemplates:
               kafkaConnection.readinessCheck.enabled: false
               nodeSelector: "null"
-              env.TOPOLOGY: "jsonfilter"
-              applicationId: "kstreams-multi-topology-single-image-jsonfilter"
               image.registry:   "{{ .IMAGE_DOMAIN_kstreams_multi_topology_single_image }}"
               image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_multi_topology_single_image }}"
               image.tag:        "{{ .IMAGE_TAG_kstreams_multi_topology_single_image }}"
             valuesFiles:
-              - values/11-ops-multi-topology-single-image/value-newlogtype.yaml
+              - values/11-ops-multi-topology-single-image/value-jsonfilter.yaml
           - name: kstreams-multi-topology-single-image-newlogtype
             chartPath: chartrepo/kstreams-1.0.0.tgz
             skipBuildDependencies: true
             setValueTemplates:
               kafkaConnection.readinessCheck.enabled: false
               nodeSelector: "null"
-              env.TOPOLOGY: "newlogtype"
-              applicationId: "kstreams-multi-topology-single-image-newlogtype"
               image.registry:   "{{ .IMAGE_DOMAIN_kstreams_multi_topology_single_image }}"
               image.repository: "{{ .IMAGE_REPO_NO_DOMAIN_kstreams_multi_topology_single_image }}"
               image.tag:        "{{ .IMAGE_TAG_kstreams_multi_topology_single_image }}"

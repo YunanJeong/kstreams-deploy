@@ -46,24 +46,18 @@ env:
   #
   # 스트림 처리 하나로 시작해서 이 줄을 생략하고 싶으면 App.buildTopology 호출측을
   # config.require(TOPOLOGY_ENV) -> config.get(TOPOLOGY_ENV, "그-이름") 으로 바꾼다.
-  TOPOLOGY: "newlogtype"
+  TOPOLOGY: "jsonfilter"
 
   # 공통 (모든 토폴로지가 사용)
   # input,output 토픽명을 동적으로 수정하고 싶을시, 환경변수로 처리하자.
   INPUT_TOPIC_REGEX: "test.topic"
   OUTPUT_TOPIC: "output.topic"
 
-  # newlogtype 전용
-  # 선택되지 않은 토폴로지의 환경변수는 없어도 앱이 뜬다. 선택된 토폴로지의 값만 검증된다.
-  #
-  # 로그타입 값이 들어있는 JSON 필드의 key 이름
-  # 상태저장소에 등장한 로그타입 목록을 그대로 유지하고, 목록에 없는 로그타입이 오면 신규로 판정
-  # 시간 구간(윈도우) 설정은 없다. 한번 등장한 로그타입은 계속 등록 상태로 남는다
-  LOG_TYPE_FIELD: "log_type"
+  # 선택되지 않은 토폴로지의 환경변수(newlogtype의 LOG_TYPE_FIELD)는 없어도 앱이 뜬다.
 
 # Maps to Kafka Streams `application.id`
 # 토폴로지(릴리스)마다 다른 값을 줄 것
-applicationId: "kstreams-multi-topology-single-image-newlogtype-consumer-group"
+applicationId: "kstreams-multi-topology-single-image-jsonfilter-consumer-group"
 
 kafkaConnection:
   # Kafka `bootstrap.servers`
