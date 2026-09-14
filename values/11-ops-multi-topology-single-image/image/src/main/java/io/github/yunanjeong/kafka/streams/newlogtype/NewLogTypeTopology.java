@@ -28,12 +28,9 @@ import io.github.yunanjeong.kafka.streams.serdes.JsonNodeSerde;
  *   OUTPUT_TOPIC      : 검출 결과를 내보낼 토픽
  *   LOG_TYPE_FIELD    : 로그타입 값이 들어있는 JSON 필드의 key 이름 (e.g. "log_type")
  */
-public final class NewLogTypeTopology {
+public class NewLogTypeTopology {
 
     private static final Logger LOG = LoggerFactory.getLogger(NewLogTypeTopology.class);
-
-    private NewLogTypeTopology() {
-    }
 
     public static Topology build(TopologyConfig config) {
 

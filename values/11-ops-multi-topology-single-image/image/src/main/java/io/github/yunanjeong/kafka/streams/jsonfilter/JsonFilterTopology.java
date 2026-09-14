@@ -23,12 +23,9 @@ import io.github.yunanjeong.kafka.streams.serdes.JsonNodeSerde;
  *   INPUT_TOPIC_REGEX : 입력 토픽 패턴
  *   OUTPUT_TOPIC      : 출력 토픽
  */
-public final class JsonFilterTopology {
+public class JsonFilterTopology {
 
     private static final Logger LOG = LoggerFactory.getLogger(JsonFilterTopology.class);
-
-    private JsonFilterTopology() {
-    }
 
     public static Topology build(TopologyConfig config) {
 
