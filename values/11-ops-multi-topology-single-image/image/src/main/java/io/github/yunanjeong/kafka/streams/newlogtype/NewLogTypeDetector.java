@@ -48,7 +48,7 @@ class NewLogTypeDetector implements Processor<String, JsonNode, String, JsonNode
 
     // 로그타입별 "최초 등장 시각"을 담는 상태저장소 이름
     // persistentKeyValueStore -> 로컬은 RocksDB, 복구용 원격 백업은 changelog 토픽(자동 생성)
-    static final String STORE_NAME = "logtype-first-seen-store";
+    static final String STORE_NAME = "logtype-seen";
 
     private final String logTypeField;
 

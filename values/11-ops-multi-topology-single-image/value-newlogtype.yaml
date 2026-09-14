@@ -12,6 +12,7 @@
 #
 # 주의: applicationId(=Kafka consumer group)는 릴리스마다 반드시 달라야 한다.
 #       같으면 서로 다른 로직이 하나의 컨슈머 그룹을 나눠먹어 각자 일부 파티션만 처리하게 된다.
+#       changelog 토픽명도 이 값으로 만들어지므로 짧게 둔다. ({applicationId}-{저장소이름}-changelog)
 
 # Pod늘렸을 때 Consumer Group명만 같으면 개발자가 별도 로직을 쓰지 않아도, Kafka가 자동으로 분산처리해줌
 replicas: 1
@@ -63,7 +64,7 @@ env:
 
 # Maps to Kafka Streams `application.id`
 # 토폴로지(릴리스)마다 다른 값을 줄 것
-applicationId: "kstreams-multi-topology-single-image-newlogtype-consumer-group"
+applicationId: "kstreams-multi-topology-single-image-newlogtype-app-id"
 
 kafkaConnection:
   # Kafka `bootstrap.servers`
